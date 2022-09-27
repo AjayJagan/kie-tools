@@ -55,6 +55,7 @@ import org.kie.workbench.common.stunner.core.diagram.Metadata;
 import org.kie.workbench.common.stunner.core.diagram.MetadataImpl;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 import org.kie.workbench.common.stunner.core.graph.Node;
+import org.kie.workbench.common.stunner.sw.SWDomainInitializer;
 import org.kie.workbench.common.stunner.sw.client.services.ClientDiagramService;
 import org.kie.workbench.common.stunner.sw.client.services.IncrementalMarshaller;
 import org.mockito.Mock;
@@ -148,6 +149,9 @@ public class DiagramEditorTest {
     @Mock
     private Event togglePreviewEvent;
 
+    @Mock
+    private SWDomainInitializer domainInitializer;
+
     private DiagramEditor tested;
     private Promises promises;
     private DiagramImpl diagram;
@@ -223,7 +227,8 @@ public class DiagramEditorTest {
                                        canvasFileExport,
                                        togglePreviewEvent));
         tested.jsRegExp = jsRegExp;
-        tested.jsCanvas = jsCanvas;
+        tested.domainInitializer = domainInitializer;
+        when(tested.getJsCanvas()).thenReturn(jsCanvas);
     }
 
     @Test
@@ -283,6 +288,12 @@ public class DiagramEditorTest {
         when(readOnlyProvider.isReadOnlyDiagram()).thenReturn(true);
         tested.onStartup(new DefaultPlaceRequest());
         verify(stunnerEditor2, times(1)).setReadOnly(eq(true));
+    }
+
+    @Test
+    public void testDomainInitializer() {
+        tested.onStartup(new DefaultPlaceRequest());
+        verify(domainInitializer, times(1)).initialize();
     }
 
     @Test

@@ -17,22 +17,8 @@
 package org.kie.workbench.common.stunner.sw.definition;
 
 import jsinterop.annotations.JsType;
-import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.stunner.client.json.mapper.annotation.JSONMapper;
-import org.kie.workbench.common.stunner.core.definition.annotation.Definition;
-import org.kie.workbench.common.stunner.core.definition.annotation.morph.Morph;
 
-/**
- * Parallel state defines a collection of branches that are executed in parallel.
- * A parallel state can be seen a state which splits up the current workflow instance execution path into multiple ones,
- * one for each branch. These execution paths are performed in parallel and are joined back into the current execution
- * path depending on the defined completionType parameter value.
- *
- * @see <a href="https://github.com/serverlessworkflow/specification/blob/main/specification.md#Parallel-State"> Parallel state </a>
- */
-@Bindable
-@Definition
-@Morph(base = State.class)
 @JSONMapper
 @JsType
 public class ParallelState extends State {
@@ -43,9 +29,9 @@ public class ParallelState extends State {
         this.type = TYPE_PARALLEL;
     }
 
-    private String completionType;
+    public String completionType;
 
-    private ParallelStateBranch[] branches;
+    public ParallelStateBranch[] branches;
 
     public String getCompletionType() {
         return completionType;
