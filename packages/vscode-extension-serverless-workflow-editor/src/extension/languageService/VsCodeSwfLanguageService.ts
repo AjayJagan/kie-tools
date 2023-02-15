@@ -25,11 +25,14 @@ import {
   SwfYamlLanguageService,
 } from "@kie-tools/serverless-workflow-language-service/dist/channel";
 import { FileLanguage } from "@kie-tools/serverless-workflow-language-service/dist/api";
+import { SchemaPathArgs } from "@kie-tools/serverless-workflow-language-service/dist/channel";
 import { FsWatchingServiceCatalogRelativeStore } from "../serviceCatalog/fs";
 import { getServiceFileNameFromSwfServiceCatalogServiceId } from "../serviceCatalog/serviceRegistry";
 import { definitelyPosixPath } from "@kie-tools-core/vscode-extension/dist/ConfigurationInterpolation";
 import { getFileLanguageOrThrow } from "@kie-tools/serverless-workflow-language-service/dist/api";
 import { KogitoEditorDocument } from "@kie-tools-core/vscode-extension/dist/VsCodeKieEditorController";
+import { ReadSchema } from "../jqExpressionCompletion/fs";
+//import { ReadDataInputSchema } from "../dataInputSchema/fs";
 
 export const SWF_YAML_LANGUAGE_ID = "serverless-workflow-yaml";
 export const SWF_JSON_LANGUAGE_ID = "serverless-workflow-json";
@@ -112,6 +115,33 @@ export class VsCodeSwfLanguageService {
           return getServiceFileNameFromSwfServiceCatalogServiceId(registryName, swfServiceCatalogServiceId);
         },
       },
+      jqCompletions: {
+        remote: {
+          getJqAutocompleteProperties: async (args: {
+            textDocument: TextDocument;
+            schemaPaths: SchemaPathArgs[];
+          }): Promise<string[]> => {
+            console.log(" the args here in remote ", args);
+            return Promise.resolve([]);
+          },
+        },
+        relative: {
+          getJqAutocompleteProperties: async (args: {
+            textDocument: TextDocument;
+            schemaPaths: SchemaPathArgs[];
+          }): Promise<string[]> => {
+            const schemaAbsoluteFilePath = args.schemaPaths.map((schema: SchemaPathArgs) => {
+              return {
+                path: this.getSchemaFilePosixPath({ doc: args.textDocument, schemaPath: schema.path }),
+                type: schema.type,
+              } as SchemaPathArgs;
+            });
+            console.log("the args in relative", schemaAbsoluteFilePath);
+            const readSchemas = new ReadSchema(schemaAbsoluteFilePath);
+            return await readSchemas.readSchemaProperties();
+          },
+        },
+      },
       config: {
         shouldDisplayServiceRegistriesIntegration: async () => {
           // FIXME: This should take the OS into account as well. RHHCC integration only works on macOS.
@@ -143,20 +173,25 @@ export class VsCodeSwfLanguageService {
 
   private getSpecsDirPosixPaths(document: TextDocument) {
     const baseFileAbsolutePosixPath = vscode.Uri.parse(document.uri).path;
-
     const specsDirAbsolutePosixPath = definitelyPosixPath(
       this.args.configuration.getInterpolatedSpecsDirAbsolutePosixPath({
         baseFileAbsolutePosixPath,
       })
     );
-
     const specsDirRelativePosixPath = definitelyPosixPath(
       path.relative(path.dirname(baseFileAbsolutePosixPath), specsDirAbsolutePosixPath)
     );
-
     return { specsDirRelativePosixPath, specsDirAbsolutePosixPath };
   }
 
+  private getSchemaFilePosixPath(args: { doc: TextDocument; schemaPath: string }) {
+    const baseFileAbsolutePosixPath = vscode.Uri.parse(args.doc.uri).path;
+    return baseFileAbsolutePosixPath
+      .split("/")
+      .splice(0, baseFileAbsolutePosixPath.split("/").length - 1)
+      .join("/")
+      .concat("/", args.schemaPath);
+  }
   public dispose() {
     this.jsonLs.dispose();
     this.yamlLs.dispose();

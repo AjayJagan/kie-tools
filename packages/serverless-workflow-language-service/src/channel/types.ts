@@ -77,3 +77,23 @@ export interface CodeCompletionStrategy {
   getStartNodeValuePosition(document: TextDocument, node: SwfLsNode): Position | undefined;
   shouldCreateCodelens(args: ShouldCreateCodelensArgs): boolean;
 }
+
+export interface SchemaPathArgs {
+  path: string;
+  type: FunctionType;
+}
+
+export enum FunctionType {
+  JSONS_SCHEMA = "json_schema",
+  ASYNC_API = "async",
+  OPEN_API = " rest",
+}
+
+export interface JqCompletions {
+  remote: {
+    getJqAutocompleteProperties(args: { textDocument: TextDocument; schemaPaths: SchemaPathArgs[] }): Promise<string[]>;
+  };
+  relative: {
+    getJqAutocompleteProperties(args: { textDocument: TextDocument; schemaPaths: SchemaPathArgs[] }): Promise<string[]>;
+  };
+}

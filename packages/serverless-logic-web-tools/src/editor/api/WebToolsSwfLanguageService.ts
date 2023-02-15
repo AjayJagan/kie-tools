@@ -55,6 +55,7 @@ export class WebToolsSwfLanguageService {
           swfServiceCatalogServiceId: string
         ) => `${registryName}__${swfServiceCatalogServiceId}__latest.yaml`,
       },
+      getSchemaCompletion: async (_args) => [],
       config: {
         shouldDisplayServiceRegistriesIntegration: async () => false,
         shouldIncludeJsonSchemaDiagnostics: async () => true,

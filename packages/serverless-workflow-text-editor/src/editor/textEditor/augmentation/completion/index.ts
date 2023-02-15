@@ -55,7 +55,7 @@ export function initCompletion(
           },
         },
       });
-
+      console.log("in index.ts the ls completion items", lsCompletionItems);
       if (cancellationToken.isCancellationRequested) {
         return undefined;
       }
@@ -83,7 +83,7 @@ export function initCompletion(
           endColumn: (c.textEdit as ls.TextEdit).range.end.character + 1,
         },
       }));
-
+      console.log("the monaco completion items", monacoCompletionItems);
       return {
         suggestions: monacoCompletionItems,
       };

@@ -116,6 +116,10 @@ module.exports = (env) => {
       fallback: {
         path: require.resolve("path-browserify"),
         os: require.resolve("os-browserify/browser"),
+        util: require.resolve("util/"),
+        http: require.resolve("stream-http"),
+        https: require.resolve("https-browserify"),
+        url: require.resolve("url/"),
         fs: false,
         child_process: false,
         net: false,
