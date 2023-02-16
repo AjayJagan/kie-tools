@@ -42,7 +42,7 @@ import {
 import * as swfModelQueries from "./modelQueries";
 import { nodeUpUntilType } from "./nodeUpUntilType";
 import { findNodeAtLocation, SwfLanguageServiceConfig } from "./SwfLanguageService";
-import { CodeCompletionStrategy, SchemaPathArgs, FunctionType, SwfLsNode, JqCompletions } from "./types";
+import { CodeCompletionStrategy, SchemaPathArgs, SwfLsNode, JqCompletions } from "./types";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
 type SwfCompletionItemServiceCatalogFunction = SwfServiceCatalogFunction & { operation: string };
@@ -140,6 +140,7 @@ function getStateNameCompletion(
 }
 
 function isRemotePath(pathUri: string): boolean {
+  console.log(pathUri.split(":"));
   return ["file", "http", "https"].includes(pathUri.split(":")[0]);
 }
 
@@ -147,9 +148,10 @@ function extractFunctionsPath(functionsNode: SwfLsNode[]) {
   const relativeList: SchemaPathArgs[] = [];
   const remoteList: SchemaPathArgs[] = [];
   functionsNode.forEach((func: SwfLsNode) => {
-    const functionType: FunctionType = findNodeAtLocation(func, ["type"])?.value.trim() ?? FunctionType.OPEN_API;
-    if (functionType === FunctionType.OPEN_API || functionType === FunctionType.ASYNC_API) {
+    const functionType = findNodeAtLocation(func, ["type"])?.value.trim() ?? "rest";
+    if (functionType == "rest" || functionType == "asyncapi") {
       const path = findNodeAtLocation(func, ["operation"])?.value.split("#")[0];
+      console.log("path isnide the extract func", path);
       if (path) {
         if (isRemotePath(path)) {
           remoteList.push({
@@ -331,26 +333,31 @@ async function getJqFunctionCompletions(
       if (isRemotePath(dataInputSchemaPath)) {
         remoteList.push({
           path: dataInputSchemaPath,
-          type: FunctionType.JSONS_SCHEMA,
+          type: "json_schema",
         });
       } else {
         relativeList.push({
           path: dataInputSchemaPath,
-          type: FunctionType.JSONS_SCHEMA,
+          type: "json_schema",
         });
       }
     }
+    console.log(remoteList, relativeList);
     if (remoteList.length > 0 || relativeList.length > 0) {
-      let getSchemaData = await Promise.all([
-        ...(await args.jqCompletions.remote.getJqAutocompleteProperties({
-          textDocument: args.document,
-          schemaPaths: remoteList ?? [],
-        })),
-        ...(await args.jqCompletions.relative.getJqAutocompleteProperties({
-          textDocument: args.document,
-          schemaPaths: relativeList ?? [],
-        })),
-      ]);
+      let getSchemaData = [
+        ...new Set(
+          await Promise.all([
+            ...(await args.jqCompletions.remote.getJqAutocompleteProperties({
+              textDocument: args.document,
+              schemaPaths: remoteList ?? [],
+            })),
+            ...(await args.jqCompletions.relative.getJqAutocompleteProperties({
+              textDocument: args.document,
+              schemaPaths: relativeList ?? [],
+            })),
+          ])
+        ),
+      ];
 
       if (getSchemaData.length === 0) {
         return Promise.resolve([]);

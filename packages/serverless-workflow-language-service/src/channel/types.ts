@@ -80,11 +80,11 @@ export interface CodeCompletionStrategy {
 
 export interface SchemaPathArgs {
   path: string;
-  type: FunctionType;
+  type: string;
 }
 
 export enum FunctionType {
-  JSONS_SCHEMA = "json_schema",
+  JSON_SCHEMA = "json_schema",
   ASYNC_API = "async",
   OPEN_API = " rest",
 }

@@ -121,8 +121,9 @@ export class VsCodeSwfLanguageService {
             textDocument: TextDocument;
             schemaPaths: SchemaPathArgs[];
           }): Promise<string[]> => {
-            console.log(" the args here in remote ", args);
-            return Promise.resolve([]);
+            console.log("the args in remote", args.schemaPaths);
+            const readSchemas = new ReadSchema(args.schemaPaths);
+            return await readSchemas.readSchemaProperties();
           },
         },
         relative: {

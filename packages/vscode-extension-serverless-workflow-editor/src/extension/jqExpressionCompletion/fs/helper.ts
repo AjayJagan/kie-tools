@@ -16,17 +16,15 @@
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import * as SwaggerParser from "@apidevtools/swagger-parser";
 import { JSONSchema } from "@apidevtools/json-schema-ref-parser/dist/lib/types";
-import { OpenAPIV3 } from "openapi-types";
-import * as yaml from "js-yaml";
-import { posix as posixPath } from "path";
-
+import * as parser from "@asyncapi/parser";
+import * as fs from "fs";
 export function getPropertiesRecursively(schema: JSONSchema): string[] {
   const result: string[] = [];
   function recursiveFunc(subSchema: any, tempArray: string[]) {
     const schemaType = subSchema.type;
     if (schemaType == "array") {
       recursiveFunc(subSchema.items, tempArray);
-    } else if (schemaType == "object") {
+    } else if (schemaType == "object" && "properties" in subSchema) {
       for (const [key, value] of Object.entries(subSchema.properties)) {
         tempArray.push(key);
         recursiveFunc(value, tempArray);
@@ -39,11 +37,12 @@ export function getPropertiesRecursively(schema: JSONSchema): string[] {
   return recursiveFunc(schema, result) ?? [];
 }
 
-export function parseJsonSchema(rawData: Uint8Array): Promise<string[]> {
+export function parseJsonSchema(path: string): Promise<string[]> {
   return new Promise(async (resolve, reject) => {
     try {
-      const schema = JSON.parse(new TextDecoder("utf-8").decode(rawData)) as JSONSchema;
-      const derefSchema = await $RefParser.dereference(schema);
+      console.log("path in the json schema", path);
+      //const schema = JSON.parse(new TextDecoder("utf-8").decode(rawData)) as JSONSchema;
+      const derefSchema = await $RefParser.dereference(path);
       const properties = getPropertiesRecursively(derefSchema);
       resolve(properties);
     } catch (e) {
@@ -52,14 +51,10 @@ export function parseJsonSchema(rawData: Uint8Array): Promise<string[]> {
   });
 }
 
-export function parseOpenApiSchema(rawData: Uint8Array, path: string): Promise<string[]> {
+export function parseOpenApiSchema(path: string): Promise<string[]> {
   return new Promise(async (resolve, reject) => {
     try {
-      const serviceName = path.split("/").pop()!;
-      //const contentParsed = await SwaggerParser.dereference(JSON.stringify(fileContentToOpenApiDocument(serviceName, rawData)));
-      const contentParsed = (await SwaggerParser.dereference(
-        new TextDecoder("utf-8").decode(rawData)
-      )) as OpenAPIV3.Document;
+      const contentParsed = await SwaggerParser.dereference(path);
       console.log(contentParsed);
       const result = Object.values(contentParsed.paths)
         .map((pathVal: any) => Object.values(pathVal))
@@ -101,17 +96,18 @@ export function parseOpenApiSchema(rawData: Uint8Array, path: string): Promise<s
   });
 }
 
-function fileContentToOpenApiDocument(fileName: string, fileContent: Uint8Array): OpenAPIV3.Document {
-  let serviceOpenApiDocument;
-  if (posixPath.extname(fileName) === ".json") {
-    serviceOpenApiDocument = JSON.parse(new TextDecoder("utf-8").decode(fileContent)) as OpenAPIV3.Document;
-  } else {
-    serviceOpenApiDocument = yaml.load(new TextDecoder("utf-8").decode(fileContent)) as OpenAPIV3.Document;
+export async function parseAsyncApiSchema(path: string): Promise<string[]> {
+  console.log("the path inside parse async api", path);
+  try {
+    //
+    // console.log(doc)
+    const data = fs.readFileSync(path);
+    console.log(data.toString());
+    const doc = await parser.parse(new TextDecoder("utf-8").decode(data).toString());
+    console.log(doc);
+    return new Promise((resolve) => resolve([]));
+  } catch (e) {
+    console.log("came into error", e);
+    throw new Error(e);
   }
-
-  if (!serviceOpenApiDocument.openapi || !serviceOpenApiDocument.info || !serviceOpenApiDocument.paths) {
-    throw new Error(`'${fileName}' is not an OpenAPI file`);
-  }
-
-  return serviceOpenApiDocument;
 }

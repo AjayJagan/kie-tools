@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from "vscode";
-import { parseJsonSchema, parseOpenApiSchema } from "./helper";
-import { SchemaPathArgs, FunctionType } from "@kie-tools/serverless-workflow-language-service/dist/channel";
+import { parseAsyncApiSchema, parseJsonSchema, parseOpenApiSchema } from "./helper";
+import { SchemaPathArgs } from "@kie-tools/serverless-workflow-language-service/dist/channel";
 
 const SCHEMA_REGEX = new RegExp("^.*\\.(json|yaml|yml)$");
 
@@ -41,48 +40,58 @@ export class ReadSchema {
 
   private async getSchemaProperties(schemaPath: SchemaPathArgs): Promise<string[]> {
     try {
-      const rawData = await this.getRawFile(schemaPath.path);
-      switch (schemaPath.type) {
-        case FunctionType.JSONS_SCHEMA:
-          return parseJsonSchema(rawData);
-        case FunctionType.ASYNC_API:
-          // return the async parser
-          return new Promise((resolve) => resolve([]));
-        case FunctionType.OPEN_API:
-          return parseOpenApiSchema(rawData, schemaPath.path);
-        default:
-          return [];
+      if (this.checkFileType(schemaPath.path)) {
+        switch (schemaPath.type) {
+          case "json_schema":
+            return parseJsonSchema(schemaPath.path);
+          case "asyncapi":
+            return parseAsyncApiSchema(schemaPath.path);
+          case "rest":
+            return parseOpenApiSchema(schemaPath.path);
+          default:
+            return [];
+        }
+      } else {
+        throw new Error(`Invalid file format, should be json,yaml or yml: ${schemaPath.path.split("/").pop()!}`);
       }
     } catch (e) {
       throw new Error(e);
     }
   }
-  private async getRawFile(path: string): Promise<Uint8Array> {
-    return new Promise<Uint8Array>((resolve, reject) => {
-      try {
-        const schemaFileAbsolutePosixPathUri = vscode.Uri.parse(path);
-        vscode.workspace.fs.stat(schemaFileAbsolutePosixPathUri).then(
-          async (stats) => {
-            if (!stats || stats.type !== vscode.FileType.File) {
-              reject(`Invalid input schema path: ${path}`);
-              return;
-            }
-            const fileName = path.split("/").pop()!;
-            if (!SCHEMA_REGEX.test(fileName.toLowerCase())) {
-              reject(`Invalid file format, must be a valid json schema: ${fileName}`);
-              return;
-            }
-            const rawData = await vscode.workspace.fs.readFile(schemaFileAbsolutePosixPathUri);
-            return resolve(rawData);
-          },
-          (reason) => {
-            reject(`could not load specs folder in ${schemaFileAbsolutePosixPathUri}. the reason ${reason}`);
-          }
-        );
-      } catch (e) {
-        console.error(e);
-        reject(`Could not read data from input schema. ${e}`);
-      }
-    });
+
+  private checkFileType(path: string): boolean {
+    const fileName = path.split("/").pop()!;
+    if (SCHEMA_REGEX.test(fileName.toLowerCase())) {
+      return true;
+    }
+    return false;
   }
+  //   private async getRawFile(path: string): Promise<Uint8Array> {
+  //     return new Promise<Uint8Array>((resolve, reject) => {
+  //       try {
+  //         const schemaFileAbsolutePosixPathUri = vscode.Uri.parse(path);
+  //         vscode.workspace.fs.stat(schemaFileAbsolutePosixPathUri).then(
+  //           async (stats) => {
+  //             if (!stats || stats.type !== vscode.FileType.File) {
+  //               reject(`Invalid input schema path: ${path}`);
+  //               return;
+  //             }
+  //             const fileName = path.split("/").pop()!;
+  //             if (!SCHEMA_REGEX.test(fileName.toLowerCase())) {
+  //               reject(`Invalid file format, must be a valid json schema: ${fileName}`);
+  //               return;
+  //             }
+  //             const rawData = await vscode.workspace.fs.readFile(schemaFileAbsolutePosixPathUri);
+  //             return resolve(rawData);
+  //           },
+  //           (reason) => {
+  //             reject(`could not load specs folder in ${schemaFileAbsolutePosixPathUri}. the reason ${reason}`);
+  //           }
+  //         );
+  //       } catch (e) {
+  //         console.error(e);
+  //         reject(`Could not read data from input schema. ${e}`);
+  //       }
+  //     });
+  //   }
 }
