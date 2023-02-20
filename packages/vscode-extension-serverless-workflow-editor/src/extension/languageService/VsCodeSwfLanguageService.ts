@@ -25,15 +25,13 @@ import {
   SwfYamlLanguageService,
 } from "@kie-tools/serverless-workflow-language-service/dist/channel";
 import { FileLanguage } from "@kie-tools/serverless-workflow-language-service/dist/api";
-import { SchemaPathArgs } from "@kie-tools/serverless-workflow-language-service/dist/channel";
 import { FsWatchingServiceCatalogRelativeStore } from "../serviceCatalog/fs";
 import { getServiceFileNameFromSwfServiceCatalogServiceId } from "../serviceCatalog/serviceRegistry";
 import { definitelyPosixPath } from "@kie-tools-core/vscode-extension/dist/ConfigurationInterpolation";
 import { getFileLanguageOrThrow } from "@kie-tools/serverless-workflow-language-service/dist/api";
 import { KogitoEditorDocument } from "@kie-tools-core/vscode-extension/dist/VsCodeKieEditorController";
-import { ReadSchema } from "../jqExpressionCompletion/fs";
-//import { ReadDataInputSchema } from "../dataInputSchema/fs";
-
+import { JqExpressionsReadSchemaFromFs } from "../jqExpressionCompletion/fs/JqExpressionsReadSchemaFromFs";
+import { removeDuplicatedKeyValuePairs } from "@kie-tools/serverless-workflow-jq-expressions/dist/utils";
 export const SWF_YAML_LANGUAGE_ID = "serverless-workflow-yaml";
 export const SWF_JSON_LANGUAGE_ID = "serverless-workflow-json";
 
@@ -119,27 +117,24 @@ export class VsCodeSwfLanguageService {
         remote: {
           getJqAutocompleteProperties: async (args: {
             textDocument: TextDocument;
-            schemaPaths: SchemaPathArgs[];
-          }): Promise<string[]> => {
-            console.log("the args in remote", args.schemaPaths);
-            const readSchemas = new ReadSchema(args.schemaPaths);
-            return await readSchemas.readSchemaProperties();
+            schemaPaths: string[];
+          }): Promise<Record<string, string>[]> => {
+            const jqExpressionReadSchema = new JqExpressionsReadSchemaFromFs();
+            const contentArray = await jqExpressionReadSchema.getContentFromRemoteUrl(args.schemaPaths);
+            return removeDuplicatedKeyValuePairs(jqExpressionReadSchema.parseSchemaProperties(contentArray));
           },
         },
         relative: {
           getJqAutocompleteProperties: async (args: {
             textDocument: TextDocument;
-            schemaPaths: SchemaPathArgs[];
-          }): Promise<string[]> => {
-            const schemaAbsoluteFilePath = args.schemaPaths.map((schema: SchemaPathArgs) => {
-              return {
-                path: this.getSchemaFilePosixPath({ doc: args.textDocument, schemaPath: schema.path }),
-                type: schema.type,
-              } as SchemaPathArgs;
+            schemaPaths: string[];
+          }): Promise<Record<string, string>[]> => {
+            const schemaAbsoluteFilePath = args.schemaPaths.map((schemaPath: string) => {
+              return this.getSchemaFilePosixPath({ doc: args.textDocument, schemaPath });
             });
-            console.log("the args in relative", schemaAbsoluteFilePath);
-            const readSchemas = new ReadSchema(schemaAbsoluteFilePath);
-            return await readSchemas.readSchemaProperties();
+            const jqExpressionReadSchema = new JqExpressionsReadSchemaFromFs();
+            const contentArray = await jqExpressionReadSchema.getContentFromFs(schemaAbsoluteFilePath);
+            return removeDuplicatedKeyValuePairs(jqExpressionReadSchema.parseSchemaProperties(contentArray));
           },
         },
       },

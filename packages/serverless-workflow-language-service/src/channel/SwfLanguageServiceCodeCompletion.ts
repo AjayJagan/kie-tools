@@ -42,8 +42,9 @@ import {
 import * as swfModelQueries from "./modelQueries";
 import { nodeUpUntilType } from "./nodeUpUntilType";
 import { findNodeAtLocation, SwfLanguageServiceConfig } from "./SwfLanguageService";
-import { CodeCompletionStrategy, SchemaPathArgs, SwfLsNode, JqCompletions } from "./types";
+import { CodeCompletionStrategy, SwfLsNode, JqCompletions } from "./types";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { jqInbuiltFunctions } from "@kie-tools/serverless-workflow-jq-expressions/dist/utils";
 
 type SwfCompletionItemServiceCatalogFunction = SwfServiceCatalogFunction & { operation: string };
 export type SwfCompletionItemServiceCatalogService = Omit<SwfServiceCatalogService, "functions"> & {
@@ -66,6 +67,10 @@ export type SwfLanguageServiceCodeCompletionFunctionsArgs = {
 
 function toCompletionItemLabel(namespace: string, resource: string, operation: string) {
   return `${namespace}»${resource}#${operation}`;
+}
+
+function isRemotePath(pathUri: string): boolean {
+  return ["file", "http", "https"].includes(pathUri.split(":")[0]);
 }
 
 function toCompletionItemLabelPrefix(
@@ -139,191 +144,37 @@ function getStateNameCompletion(
   });
 }
 
-function isRemotePath(pathUri: string): boolean {
-  console.log(pathUri.split(":"));
-  return ["file", "http", "https"].includes(pathUri.split(":")[0]);
-}
-
 function extractFunctionsPath(functionsNode: SwfLsNode[]) {
-  const relativeList: SchemaPathArgs[] = [];
-  const remoteList: SchemaPathArgs[] = [];
+  const relativeList: string[] = [];
+  const remoteList: string[] = [];
   functionsNode.forEach((func: SwfLsNode) => {
     const functionType = findNodeAtLocation(func, ["type"])?.value.trim() ?? "rest";
     if (functionType == "rest" || functionType == "asyncapi") {
       const path = findNodeAtLocation(func, ["operation"])?.value.split("#")[0];
-      console.log("path isnide the extract func", path);
       if (path) {
         if (isRemotePath(path)) {
-          remoteList.push({
-            path: path,
-            type: functionType,
-          });
+          remoteList.push(path);
         } else {
-          relativeList.push({
-            path: path,
-            type: functionType,
-          });
+          relativeList.push(path);
         }
       }
     }
   });
   return { relativeList, remoteList };
 }
-
+/**
+ * get jq CodeCompletion functions
+ */
 async function getJqFunctionCompletions(
   args: SwfLanguageServiceCodeCompletionFunctionsArgs
 ): Promise<CompletionItem[]> {
-  const functionList = [
-    "length",
-    "utf8bytelength",
-    "keys",
-    "keys",
-    "has(key)",
-    "in",
-    "map(x)",
-    "map_values(x)",
-    "path(path_expression)",
-    "del(path_expression)",
-    "getpath(PATHS)",
-    "setpath(PATHS; VALUE)",
-    "delpaths(PATHS)",
-    "to_entries",
-    "from_entries",
-    "from_entries",
-    "select(boolean_expression)",
-    "arrays",
-    "objects",
-    "iterables",
-    "booleans",
-    "numbers",
-    "normals",
-    "finites",
-    "strings",
-    "nulls",
-    "values",
-    "scalars",
-    "empty",
-    "error(message)",
-    "halt",
-    "halt_error",
-    "halt_error(exit_code)",
-    "$__loc__",
-    "paths",
-    "paths(node_filter)",
-    "leaf_paths",
-    "add",
-    "any",
-    "any(condition)",
-    "any(generator; condition)",
-    "all",
-    "all(condition)",
-    "all(generator; condition)",
-    "flatten",
-    "flatten(depth)",
-    "range(upto)",
-    "range(from;upto)",
-    "range(from;upto;by)",
-    "floor",
-    "sqrt",
-    "tonumber",
-    "tostring",
-    "type",
-    "infinite",
-    "nan",
-    "isinfinite",
-    "isnan",
-    "isfinite",
-    "isnormal",
-    "sort",
-    "sort_by(path_expression)",
-    "group_by(path_expression)",
-    "min",
-    "max",
-    "min_by(path_exp)",
-    "max_by(path_exp)",
-    "unique",
-    "unique_by(path_exp)",
-    "reverse",
-    "contains(element)",
-    "indices(s)",
-    "index(s)",
-    "rindex(s)",
-    "inside",
-    "startswith(str)",
-    "endswith(str)",
-    "combinations",
-    "combinations(n)",
-    "ltrimstr(str)",
-    "rtrimstr(str)",
-    "explode",
-    "implode",
-    "split(str)",
-    "join(str)",
-    "ascii_downcase",
-    "ascii_upcase",
-    "while(cond; update)",
-    "until(cond; next)",
-    "recurse(f)",
-    "recurse",
-    "recurse(f; condition)",
-    "recurse_down",
-    "walk(f)",
-    "$ENV",
-    "env",
-    "transpose",
-    "bsearch(x)",
-    "try",
-    "catch",
-    "if",
-    "then",
-    "else",
-    "end",
-    "not",
-    "break",
-    "test(val)",
-    "test(regex; flags)",
-    "match(val)",
-    "match(regex; flags)",
-    "capture(val)",
-    "capture(regex; flags)",
-    "scan(regex)",
-    "scan(regex; flags)",
-    "split(regex; flags)",
-    "splits(regex)",
-    "splits(regex; flags)",
-    "sub(regex; tostring)",
-    "sub(regex; string; flags)",
-    "gsub(regex; string)",
-    "gsub(regex; string; flags)",
-    "def",
-    "reduce",
-    "isempty(exp)",
-    "limit(n; exp)",
-    "first(expr)",
-    "last(expr)",
-    "nth(n; expr)",
-    "first",
-    "last",
-    "nth(n)",
-    "foreach",
-    "recurse",
-    "while",
-    "truncate_stream(stream_expression)",
-    "fromstream(stream_expression)",
-    "tostream",
-    "input",
-    "inputs",
-    "debug",
-    "stderr",
-    "input_filename",
-    "input_line_number",
-    "--stream",
-  ];
-  const kind = CompletionItemKind.Value;
   const currentCursor = args.cursorOffset - args.currentNode.offset;
-  let expressionValue = args.currentNode.value.slice(0, currentCursor).trim();
-  let wordToSearch = expressionValue.split(" ").pop();
-  wordToSearch = wordToSearch.replace(/[^a-zA-Z _.(]/g, "");
+  let wordToSearch = args.currentNode.value
+    .slice(0, currentCursor)
+    .trim()
+    .split(" ")
+    .pop()
+    .replace(/[^a-zA-Z _.(]/g, "");
   if (wordToSearch.startsWith(".") || wordToSearch.includes("(.")) {
     const { relativeList, remoteList } = extractFunctionsPath(
       findNodeAtLocation(args.rootNode, ["functions"])?.children!
@@ -331,54 +182,42 @@ async function getJqFunctionCompletions(
     const dataInputSchemaPath = findNodeAtLocation(args.rootNode, ["dataInputSchema"])?.value;
     if (dataInputSchemaPath) {
       if (isRemotePath(dataInputSchemaPath)) {
-        remoteList.push({
-          path: dataInputSchemaPath,
-          type: "json_schema",
-        });
+        remoteList.push(dataInputSchemaPath);
       } else {
-        relativeList.push({
-          path: dataInputSchemaPath,
-          type: "json_schema",
-        });
+        relativeList.push(dataInputSchemaPath);
       }
     }
-    console.log(remoteList, relativeList);
     if (remoteList.length > 0 || relativeList.length > 0) {
-      let getSchemaData = [
-        ...new Set(
-          await Promise.all([
-            ...(await args.jqCompletions.remote.getJqAutocompleteProperties({
-              textDocument: args.document,
-              schemaPaths: remoteList ?? [],
-            })),
-            ...(await args.jqCompletions.relative.getJqAutocompleteProperties({
-              textDocument: args.document,
-              schemaPaths: relativeList ?? [],
-            })),
-          ])
-        ),
-      ];
-
+      const getSchemaData = await Promise.all([
+        ...(await args.jqCompletions.remote.getJqAutocompleteProperties({
+          textDocument: args.document,
+          schemaPaths: remoteList ?? [],
+        })),
+        ...(await args.jqCompletions.relative.getJqAutocompleteProperties({
+          textDocument: args.document,
+          schemaPaths: relativeList ?? [],
+        })),
+      ]);
       if (getSchemaData.length === 0) {
         return Promise.resolve([]);
       }
       wordToSearch = wordToSearch.slice(wordToSearch.indexOf("."), wordToSearch.length);
       return Promise.resolve(
         getSchemaData
-          .filter((prop: string) => {
+          .filter((prop: Record<string, string>) => {
             if (wordToSearch === ".") {
               return true;
             } else {
-              return prop.startsWith(wordToSearch.slice(1, wordToSearch.length));
+              return Object.keys(prop)[0].startsWith(wordToSearch.slice(1, wordToSearch.length));
             }
           })
-          .map((prop: string) => {
+          .map((parsedProp: Record<string, string>) => {
             return createCompletionItem({
               ...args,
-              completion: prop,
-              kind,
-              label: prop,
-              detail: "jq completions",
+              completion: Object.keys(parsedProp)[0],
+              kind: CompletionItemKind.Value,
+              label: Object.keys(parsedProp)[0],
+              detail: Object.values(parsedProp)[0],
               overwriteRange: Range.create(
                 Position.create(args.cursorPosition.line, args.cursorPosition.character),
                 Position.create(args.cursorPosition.line, args.cursorPosition.character)
@@ -389,15 +228,15 @@ async function getJqFunctionCompletions(
     }
   }
 
-  return functionList
-    .filter((func) => func.startsWith(wordToSearch))
+  return jqInbuiltFunctions
+    .filter((func) => func.functionName.startsWith(wordToSearch))
     .map((filteredFunc) => {
       return createCompletionItem({
         ...args,
-        completion: filteredFunc,
-        kind,
-        label: filteredFunc,
-        detail: "jq completions",
+        completion: filteredFunc.functionName,
+        kind: CompletionItemKind.Function,
+        label: filteredFunc.functionName,
+        detail: filteredFunc.description,
         overwriteRange: Range.create(
           Position.create(args.cursorPosition.line, args.cursorPosition.character - wordToSearch.length),
           Position.create(args.cursorPosition.line, args.cursorPosition.character)

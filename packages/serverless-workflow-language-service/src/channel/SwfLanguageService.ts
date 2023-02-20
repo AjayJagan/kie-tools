@@ -34,7 +34,7 @@ import {
   SwfLanguageServiceCodeLenses,
   SwfLanguageServiceCodeLensesFunctionsArgs,
 } from "./SwfLanguageServiceCodeLenses";
-import { CodeCompletionStrategy, JqCompletions, SchemaPathArgs, SwfJsonPath, SwfLsNode } from "./types";
+import { CodeCompletionStrategy, JqCompletions, SwfJsonPath, SwfLsNode } from "./types";
 
 export type SwfLanguageServiceConfig = {
   shouldConfigureServiceRegistries: () => boolean; //TODO: See https://issues.redhat.com/browse/KOGITO-7107
@@ -70,14 +70,14 @@ export type SwfLanguageServiceArgs = {
     remote: {
       getJqAutocompleteProperties: (args: {
         textDocument: TextDocument;
-        schemaPaths: SchemaPathArgs[];
-      }) => Promise<string[]>;
+        schemaPaths: string[];
+      }) => Promise<Record<string, string>[]>;
     };
     relative: {
       getJqAutocompleteProperties: (args: {
         textDocument: TextDocument;
-        schemaPaths: SchemaPathArgs[];
-      }) => Promise<string[]>;
+        schemaPaths: string[];
+      }) => Promise<Record<string, string>[]>;
     };
   };
   config: SwfLanguageServiceConfig;
@@ -138,7 +138,6 @@ export class SwfLanguageService {
         root: args.rootNode,
       })
     );
-    console.info("matched completions ", matchedCompletions);
     const result = await Promise.all(
       matchedCompletions.map(([_, completionItemsDelegate]) => {
         return completionItemsDelegate({
@@ -156,7 +155,6 @@ export class SwfLanguageService {
         });
       })
     );
-    console.log("final result", result.flat());
     return Promise.resolve(result.flat());
   }
 
