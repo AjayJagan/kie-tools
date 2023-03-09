@@ -44,4 +44,5 @@ export interface EditorApi {
   validate(): Promise<Notification[]>;
   setTheme(theme: EditorTheme): Promise<void>;
   selectStateByName?(name: string): Promise<void>;
+  getUUIDByName?(name: string): Promise<string>;
 }

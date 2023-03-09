@@ -45,6 +45,7 @@ export interface GwtEditor {
   getPreview(): Promise<string | undefined>;
   validate(): Promise<Notification[]>;
   selectStateByName(name: string): Promise<void>;
+  getUUIDByName(name: string): Promise<string>;
 }
 
 export class GwtAppFormerConsumedInteropApi {

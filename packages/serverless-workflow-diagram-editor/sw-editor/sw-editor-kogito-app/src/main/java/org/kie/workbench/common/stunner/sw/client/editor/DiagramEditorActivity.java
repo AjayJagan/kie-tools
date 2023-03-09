@@ -69,6 +69,11 @@ public class DiagramEditorActivity extends AbstractActivity implements EditorAct
     }
 
     @Override
+    public Promise<String> getUUIDByName(String name){
+        return realPresenter.getUUIDByName(name);
+    }
+
+    @Override
     public Promise<String> getContent() {
         return realPresenter.getContent();
     }
