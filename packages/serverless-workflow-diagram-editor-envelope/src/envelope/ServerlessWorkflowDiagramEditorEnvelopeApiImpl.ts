@@ -85,4 +85,8 @@ export class ServerlessWorkflowDiagramEditorEnvelopeApiImpl
   public kogitoSwfDiagramEditor__highlightNode(args: { nodeName: string }) {
     return this.getEditorOrThrowError().selectStateByName(args.nodeName);
   }
+
+  public async kogitoSwfDiagramEditor__getUUIDByName(name: string) {
+    return this.getEditorOrThrowError().getUUIDByName(name);
+  }
 }
