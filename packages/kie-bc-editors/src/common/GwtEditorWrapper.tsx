@@ -95,6 +95,10 @@ export class GwtEditorWrapper implements Editor {
     return this.gwtEditor.selectStateByName(name);
   }
 
+  public getUUIDByName(name: string) {
+    return this.gwtEditor.getUUIDByName(name);
+  }
+
   public getPreview(): Promise<string | undefined> {
     return this.gwtEditor.getPreview();
   }

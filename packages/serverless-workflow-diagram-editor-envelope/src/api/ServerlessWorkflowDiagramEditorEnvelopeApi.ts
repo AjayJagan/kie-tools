@@ -19,4 +19,5 @@ import { CanvasEnvelopeApi } from "@kie-tools/kie-bc-editors/dist/canvas/CanvasE
 
 export interface ServerlessWorkflowDiagramEditorEnvelopeApi extends KogitoEditorEnvelopeApi, CanvasEnvelopeApi {
   kogitoSwfDiagramEditor__highlightNode(args: { nodeName: string }): void;
+  kogitoSwfDiagramEditor__getUUIDByName(name: string): Promise<string>;
 }

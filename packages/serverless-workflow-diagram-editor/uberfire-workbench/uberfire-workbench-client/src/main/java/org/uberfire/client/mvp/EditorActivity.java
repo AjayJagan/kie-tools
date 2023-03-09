@@ -30,6 +30,8 @@ public interface EditorActivity extends Activity {
         throw new UnsupportedOperationException("The editor does not support state selection.");
     }
 
+    Promise<String> getUUIDByName(String name);
+
     Promise<String> getContent();
 
     Promise<String> getPreview();

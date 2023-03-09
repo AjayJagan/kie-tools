@@ -34,6 +34,10 @@ public class JSFunctions {
             return this.instance.@org.uberfire.client.mvp.EditorActivity::selectStateByName(Ljava/lang/String;)(name);
         };
 
+        $wnd.GWTEditor.prototype.getUUIDByName = function (name) {
+            return this.instance.@org.uberfire.client.mvp.EditorActivity::getUUIDByName(Ljava/lang/String;)(name);
+        };
+
         $wnd.GWTEditor.prototype.getContent = function () {
             return this.instance.@org.uberfire.client.mvp.EditorActivity::getContent()();
         };

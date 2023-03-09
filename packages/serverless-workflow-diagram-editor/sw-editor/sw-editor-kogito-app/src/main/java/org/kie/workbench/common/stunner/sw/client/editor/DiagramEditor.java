@@ -232,6 +232,11 @@ public class DiagramEditor {
         return null;
     }
 
+    public Promise<String> getUUIDByName(final String name) {
+    String uuid = diagramService.getMarshaller().getContext().getNameToUUIDBindings().get(name);
+    return Promise.resolve(uuid);
+}
+
     public void onStartup(final PlaceRequest place) {
         stunnerEditor.setReadOnly(true);
     }
