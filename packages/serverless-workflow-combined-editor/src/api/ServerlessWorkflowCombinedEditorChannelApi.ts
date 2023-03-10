@@ -34,4 +34,5 @@ export interface ServerlessWorkflowCombinedEditorChannelApi
    * @returns
    */
   kogitoSwfCombinedEditor_moveCursorToPosition(position: Position): void;
+  kogitoSwfCombinedEditor_colorNodesBasedOnName(name: string): void;
 }
