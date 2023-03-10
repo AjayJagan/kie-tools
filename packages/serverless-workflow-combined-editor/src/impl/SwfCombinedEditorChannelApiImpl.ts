@@ -56,6 +56,9 @@ export class SwfCombinedEditorChannelApiImpl implements ServerlessWorkflowCombin
     private readonly swfPreviewOptionsChannelApiImpl?: SwfPreviewOptionsChannelApi,
     private readonly swfStaticEnvelopeContentProviderChannelApi?: SwfStaticEnvelopeContentProviderChannelApi
   ) {}
+  kogitoSwfCombinedEditor_colorNodesBasedOnName(name: string): void {
+    // no-op
+  }
 
   public kogitoEditor_contentRequest(): Promise<EditorContent> {
     return this.defaultApiImpl.kogitoEditor_contentRequest();

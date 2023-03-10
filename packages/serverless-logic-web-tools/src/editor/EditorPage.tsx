@@ -423,6 +423,19 @@ export function EditorPage(props: Props) {
     },
     [swfEditorChannelApi]
   );
+
+  useEffect(() => {
+    console.log("this should be called");
+    swfEditorChannelApi?.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send("squareState");
+  }, [editor, swfEditorChannelApi]);
+  if (swfEditorChannelApi && swfEditorChannelApi.notifications) {
+    swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send("squareState");
+  }
+  // useEffect(()=>{
+  //   if(isEditorReady){
+  //     swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send("squareState");
+  //   }
+  // },[isEditorReady])
   return (
     <OnlineEditorPage>
       <PromiseStateWrapper
