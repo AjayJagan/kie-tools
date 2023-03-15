@@ -161,7 +161,10 @@ export class ServerlessWorkflowDiagramEditorEnvelopeApiImpl
     return this.getEditorOrThrowError().draw();
   }
 
-  public kogitoSwfDiagramEditor__highlightNode(args: { nodeName: string | null }) {
+  public async canvas_draw() {
+    return this.getEditorOrThrowError().draw();
+  }
+  public kogitoSwfDiagramEditor__highlightNode(args: { nodeName: string }) {
     return this.getEditorOrThrowError().selectStateByName(args.nodeName);
   }
 }

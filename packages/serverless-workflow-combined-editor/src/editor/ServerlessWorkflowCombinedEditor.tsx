@@ -423,18 +423,24 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
   //   useCallback(
   //     (name: string) => {
   //       console.log("the name here is", name);
+  //       console.log("the diagram editor", diagramEditor);
   //       const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
   //         .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
-  //       swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(name).then(async (uuid: string) => {
-  //         console.log("the uuid inside use subscription is ", uuid);
-  //         if (uuid) {
-  //           await swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, "red");
-  //         }
-  //       });
+  //       swfDiagramEditorEnvelopeApi.requests
+  //         .kogitoSwfDiagramEditor__getUUIDByName(name)
+  //         .then(async (uuid: string) => {
+  //           console.log("the uuid inside use subscription is ", uuid);
+  //           if (uuid) {
+  //             await swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, "red");
+  //             await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
+  //           }
+  //         })
+  //         .catch((err) => {
+  //           console.log("an error in the get uuid", err);
+  //         });
   //     },
   //     [diagramEditor]
   //   )
-  // );
   return (
     <div style={{ height: "100%" }}>
       <LoadingScreen loading={!isCombinedEditorReady} />

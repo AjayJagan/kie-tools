@@ -140,4 +140,8 @@ export class ServerlessWorkflowDiagramEditorImpl extends GwtEditorWrapper implem
   public draw() {
     window.editor.canvas.draw();
   }
+
+  public draw() {
+    window.canvas.draw();
+  }
 }
