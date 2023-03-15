@@ -71,4 +71,8 @@ export class DmnEditorImpl extends GwtEditorWrapper implements DmnEditor {
   public centerNode(uuid: string) {
     window.canvas.centerNode(uuid);
   }
+
+  public draw() {
+    window.canvas.draw();
+  }
 }

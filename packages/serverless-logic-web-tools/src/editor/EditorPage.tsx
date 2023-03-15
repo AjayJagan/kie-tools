@@ -172,6 +172,7 @@ export function EditorPage(props: Props) {
           setEmbeddedEditorFile({
             path: workspaceFilePromise.data.workspaceFile.relativePath,
             getFileContents: async () => content,
+            //isReadOnly: true,
             isReadOnly: !isEditable(workspaceFilePromise.data.workspaceFile.relativePath),
             fileExtension: workspaceFilePromise.data.workspaceFile.extension,
             fileName: workspaceFilePromise.data.workspaceFile.name,
@@ -424,18 +425,18 @@ export function EditorPage(props: Props) {
     [swfEditorChannelApi]
   );
 
-  useEffect(() => {
-    console.log("this should be called");
-    swfEditorChannelApi?.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send("squareState");
-  }, [editor, swfEditorChannelApi]);
   if (swfEditorChannelApi && swfEditorChannelApi.notifications) {
     swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send("squareState");
   }
   // useEffect(()=>{
-  //   if(isEditorReady){
+  //   if(isReady && swfEditorChannelApi){
   //     swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send("squareState");
   //   }
-  // },[isEditorReady])
+  // },[isReady, swfEditorChannelApi])
+  // useEffect(() => {
+  //   console.log("this should be called");
+  //   swfEditorChannelApi?.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send("squareState");
+  // }, [editor]);
   return (
     <OnlineEditorPage>
       <PromiseStateWrapper
