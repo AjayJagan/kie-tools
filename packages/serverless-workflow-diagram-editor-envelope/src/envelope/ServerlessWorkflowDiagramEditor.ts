@@ -71,4 +71,8 @@ export class ServerlessWorkflowDiagramEditorImpl extends GwtEditorWrapper implem
   public centerNode(uuid: string) {
     window.canvas.centerNode(uuid);
   }
+
+  public draw() {
+    window.canvas.draw();
+  }
 }
