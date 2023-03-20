@@ -65,7 +65,12 @@ import {
   useState,
 } from "react";
 import { Position } from "monaco-editor";
-import { ServerlessWorkflowCombinedEditorChannelApi, SwfFeatureToggle, SwfPreviewOptions } from "../api";
+import {
+  colorNodesData,
+  ServerlessWorkflowCombinedEditorChannelApi,
+  SwfFeatureToggle,
+  SwfPreviewOptions,
+} from "../api";
 import { useSwfDiagramEditorChannelApi } from "./hooks/useSwfDiagramEditorChannelApi";
 import { useSwfTextEditorChannelApi } from "./hooks/useSwfTextEditorChannelApi";
 
@@ -125,7 +130,8 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
 
   const [isTextEditorReady, setTextEditorReady] = useState(false);
   const [isDiagramEditorReady, setDiagramEditorReady] = useState(false);
-
+  //hack
+  //const [colorNodesData, setColorNodesData] = useState<colorNodesData[]>([]);
   const isVscode = useMemo(
     () => props.channelType === ChannelType.VSCODE_DESKTOP || props.channelType === ChannelType.VSCODE_WEB,
     [props.channelType]
@@ -395,10 +401,17 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
           locale={props.locale}
           customChannelApiImpl={diagramEditorChannelApi}
           stateControl={diagramEditorStateControl}
+          isReady={isDiagramEditorReady}
         />
       )
     );
   };
+
+  useEffect(() => {
+    if (isCombinedEditorReady) {
+      editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_combinedEditorReady.send();
+    }
+  }, [isCombinedEditorReady]);
 
   useSubscription(
     editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_moveCursorToPosition,
