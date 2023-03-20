@@ -58,7 +58,12 @@ import {
   useState,
 } from "react";
 import { Position } from "monaco-editor";
-import { ServerlessWorkflowCombinedEditorChannelApi, SwfFeatureToggle, SwfPreviewOptions } from "../api";
+import {
+  colorNodesData,
+  ServerlessWorkflowCombinedEditorChannelApi,
+  SwfFeatureToggle,
+  SwfPreviewOptions,
+} from "../api";
 import { useSwfDiagramEditorChannelApi } from "./hooks/useSwfDiagramEditorChannelApi";
 import { useSwfTextEditorChannelApi } from "./hooks/useSwfTextEditorChannelApi";
 
@@ -112,7 +117,8 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
 
   const [isTextEditorReady, setTextEditorReady] = useState(false);
   const [isDiagramEditorReady, setDiagramEditorReady] = useState(false);
-
+  //hack
+  //const [colorNodesData, setColorNodesData] = useState<colorNodesData[]>([]);
   const isVscode = useMemo(
     () => props.channelType === ChannelType.VSCODE_DESKTOP || props.channelType === ChannelType.VSCODE_WEB,
     [props.channelType]
@@ -391,10 +397,17 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
           locale={props.locale}
           customChannelApiImpl={diagramEditorChannelApi}
           stateControl={diagramEditorStateControl}
+          isReady={isDiagramEditorReady}
         />
       )
     );
   };
+
+  useEffect(() => {
+    if (isCombinedEditorReady) {
+      editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_combinedEditorReady.send();
+    }
+  }, [isCombinedEditorReady]);
 
   useSubscription(
     editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_moveCursorToPosition,
@@ -409,30 +422,152 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
     )
   );
 
+  // useSubscription(
+  //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
+  //   useCallback(
+  //      (colorNodesData: colorNodesData[]) => {
+  //       console.log('does it come here is the combined editor')
+  //       const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
+  //       .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
+  //       colorNodesData.forEach((nodeData:colorNodesData)=>{
+  //         swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(nodeData.nodeName).then((uuid:string)=>{
+  //           if(uuid){
+  //           swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid,nodeData.nodeColor).then(async()=>{
+  //             await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
+  //           })
+  //           }
+  //         });
+  //       });
+  //     },
+  //     [isCombinedEditorReady, diagramEditor]
+  //   )
+  // );
+  // useSubscription(
+  //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
+  //   useCallback(
+  //     async (colorNodesData: colorNodesData[]) => {
+  //       if(isCombinedEditorReady){
+  //         const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
+  //         .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
+  //       const setBackgroundColorPromises: Promise<void>[] = []
+  //       console.log(1)
+  //       colorNodesData.forEach(async (nodeData: colorNodesData) => {
+  //         const uuid = await swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(nodeData.nodeName);
+  //         if(uuid){
+  //           setBackgroundColorPromises.push(swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, nodeData.nodeColor))
+  //         }
+  //       });
+  //       console.log(2);
+  //       await Promise.all(setBackgroundColorPromises);
+  //       console.log(3);
+  //       await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
+  //       console.log(4)
+  //       }
+  //     },
+  //     [isCombinedEditorReady, diagramEditor]
+  //   )
+  // );
+
   useSubscription(
     editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
     useCallback(
-      (name: string) => {
-        console.log("the name here is", name);
-        console.log("the diagram editor", diagramEditor);
-        const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
-          .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
-        swfDiagramEditorEnvelopeApi.requests
-          .kogitoSwfDiagramEditor__getUUIDByName(name)
-          .then(async (uuid: string) => {
-            console.log("the uuid inside use subscription is ", uuid);
+      async (colorNodesData: colorNodesData[]) => {
+        if (isCombinedEditorReady) {
+          const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
+            .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
+          console.log(1);
+          colorNodesData.forEach(async (nodeData: colorNodesData) => {
+            const uuid = await swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(
+              nodeData.nodeName
+            );
             if (uuid) {
-              await swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, "red");
-              await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
+              //@ts-ignore
+              diagramEditor?.iframeRef.current?.contentWindow.canvas.setBackgroundColor(uuid, nodeData.nodeColor);
             }
-          })
-          .catch((err) => {
-            console.log("an error in the get uuid", err);
           });
+          console.log(2);
+          //@ts-ignore
+          diagramEditor?.iframeRef.current?.contentWindow.canvas.draw();
+          console.log(3);
+        }
       },
-      [diagramEditor]
+      [isCombinedEditorReady, diagramEditor]
     )
   );
+  // hack
+  // useSubscription(
+  //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
+  //   useCallback(
+  //      (colorNodesData: colorNodesData[]) => {
+  //       setColorNodesData(colorNodesData)
+  //     },
+  //     [diagramEditor]
+  //   )
+  // );
+  //hack
+  // useEffect(()=>{
+  //   if(isCombinedEditorReady && colorNodesData.length>0){
+  //     const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
+  //     .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
+  //     const setBackgroundColorPromises:Promise<void>[] =[]
+  //     colorNodesData.forEach((nodeData:colorNodesData)=>{
+  //       swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(nodeData.nodeName).then((uuid:string)=>{
+  //         if(uuid){
+  //           setBackgroundColorPromises.push(swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid,nodeData.nodeColor))
+  //         }
+  //       });
+  //       console.log(setBackgroundColorPromises)
+  //       Promise.all(setBackgroundColorPromises).then(async()=>{
+  //         console.log('it comes here')
+  //         await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
+  //       })
+  //     });
+  //      swfDiagramEditorEnvelopeApi.requests.canvas_draw().then(()=>{
+  //       // do-nothing
+  //       console.log('can it draw')
+  //      }).catch((e: any)=>console.error('error while coloring the nodes',e))
+  //   }
+  // },[isCombinedEditorReady, colorNodesData]);
+
+  //hack
+  // useEffect(()=>{
+  //   if(isCombinedEditorReady && colorNodesData.length>0){
+  //     const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
+  //     .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
+  //     colorNodesData.forEach((nodeData:colorNodesData)=>{
+  //       swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(nodeData.nodeName).then((uuid:string)=>{
+  //         if(uuid){
+  //         swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid,nodeData.nodeColor).then(async()=>{
+  //           await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
+  //         })
+  //         }
+  //       });
+  //     });
+  //   }
+  // },[isCombinedEditorReady, colorNodesData]);
+
+  // useSubscription(
+  //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
+  //   useCallback(
+  //     (colorNodesData: colorNodesData[]) => {
+  //       const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
+  //         .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
+  //       colorNodesData.forEach((nodeData: colorNodesData) => {
+  //         swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(nodeData.nodeName).then((uuid: string) => {
+  //           if (uuid) {
+  //             //@ts-ignore
+  //             diagramEditor?.iframeRef.current?.contentWindow.canvas.setBackgroundColor(uuid,nodeData.nodeColor);
+  //             }
+  //         });
+  //       });
+  //      setTimeout(()=>{
+  //        //@ts-ignore
+  //        diagramEditor?.iframeRef.current?.contentWindow.canvas.draw();
+  //      },5000)
+  //     },
+  //     [isCombinedEditorReady, diagramEditor]
+  //   )
+  // );
   return (
     <div style={{ height: "100%" }}>
       <LoadingScreen loading={!isCombinedEditorReady} />

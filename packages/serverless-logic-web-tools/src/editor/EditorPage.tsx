@@ -130,8 +130,8 @@ export function EditorPage(props: Props) {
           setEmbeddedEditorFile({
             path: workspaceFilePromise.data.workspaceFile.relativePath,
             getFileContents: async () => content,
-            //isReadOnly: true,
-            isReadOnly: !isEditable(workspaceFilePromise.data.workspaceFile.relativePath),
+            isReadOnly: true,
+            //isReadOnly: !isEditable(workspaceFilePromise.data.workspaceFile.relativePath),
             fileExtension: workspaceFilePromise.data.workspaceFile.extension,
             fileName: workspaceFilePromise.data.workspaceFile.name,
           });
