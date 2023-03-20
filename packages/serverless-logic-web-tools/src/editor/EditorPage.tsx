@@ -69,6 +69,7 @@ import { DashbuilderLanguageServiceChannelApiImpl } from "./api/DashbuilderLangu
 import { DashbuilderLanguageService } from "@kie-tools/dashbuilder-language-service/dist/channel";
 import { DashbuilderEditorChannelApiImpl } from "@kie-tools/dashbuilder-editor/dist/impl";
 import { DashbuilderLanguageServiceChannelApi } from "@kie-tools/dashbuilder-language-service/dist/api";
+
 export interface Props {
   workspaceId: string;
   fileRelativePath: string;
@@ -172,8 +173,8 @@ export function EditorPage(props: Props) {
           setEmbeddedEditorFile({
             path: workspaceFilePromise.data.workspaceFile.relativePath,
             getFileContents: async () => content,
-            //isReadOnly: true,
-            isReadOnly: !isEditable(workspaceFilePromise.data.workspaceFile.relativePath),
+            isReadOnly: true,
+            //isReadOnly: !isEditable(workspaceFilePromise.data.workspaceFile.relativePath),
             fileExtension: workspaceFilePromise.data.workspaceFile.extension,
             fileName: workspaceFilePromise.data.workspaceFile.name,
           });
@@ -421,22 +422,28 @@ export function EditorPage(props: Props) {
       swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_moveCursorToPosition.send(
         new Position(notification.position.startLineNumber, notification.position.startColumn)
       );
+      swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_combinedEditorReady;
     },
     [swfEditorChannelApi]
   );
 
-  if (swfEditorChannelApi && swfEditorChannelApi.notifications) {
-    swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send("squareState");
-  }
-  // useEffect(()=>{
-  //   if(isReady && swfEditorChannelApi){
-  //     swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send("squareState");
-  //   }
-  // },[isReady, swfEditorChannelApi])
-  // useEffect(() => {
-  //   console.log("this should be called");
-  //   swfEditorChannelApi?.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send("squareState");
-  // }, [editor]);
+  useEffect(() => {
+    if (swfEditorChannelApi) {
+      swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_combinedEditorReady.subscribe(() => {
+        swfEditorChannelApi?.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send([
+          {
+            nodeName: "squareState",
+            nodeColor: "red",
+          },
+          {
+            nodeName: "finish",
+            nodeColor: "blue",
+          },
+        ]);
+      });
+    }
+  }, [swfEditorChannelApi]);
+
   return (
     <OnlineEditorPage>
       <PromiseStateWrapper

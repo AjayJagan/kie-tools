@@ -21,6 +21,10 @@ import { SwfFeatureToggleChannelApi } from "./SwfFeatureToggleChannelApi";
 import { SwfPreviewOptionsChannelApi } from "./SwfPreviewOptionsChannelApi";
 import { SwfStaticEnvelopeContentProviderChannelApi } from "./SwfStaticEnvelopeContentProviderChannelApi";
 
+export interface colorNodesData {
+  nodeName: string;
+  nodeColor: string;
+}
 export interface ServerlessWorkflowCombinedEditorChannelApi
   extends KogitoEditorChannelApi,
     SwfFeatureToggleChannelApi,
@@ -34,5 +38,6 @@ export interface ServerlessWorkflowCombinedEditorChannelApi
    * @returns
    */
   kogitoSwfCombinedEditor_moveCursorToPosition(position: Position): void;
-  kogitoSwfCombinedEditor_colorNodesBasedOnName(name: string): void;
+  kogitoSwfCombinedEditor_colorNodesBasedOnName(colorNodesData: colorNodesData[]): void;
+  kogitoSwfCombinedEditor_combinedEditorReady(): void;
 }
