@@ -16,10 +16,13 @@
 
 package org.kie.workbench.common.stunner.sw.client.editor;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.user.client.ui.IsWidget;
 import elemental2.promise.Promise;
 import org.uberfire.client.mvp.AbstractActivity;
@@ -72,6 +75,18 @@ public class DiagramEditorActivity extends AbstractActivity implements EditorAct
     public Promise<String> getUUIDByName(String name){
         return realPresenter.getUUIDByName(name);
     }
+
+    @Override
+    public Promise<List<String>> getUUIDListByNames(JsArrayString names){
+        System.out.println("can it print the names in DiagramEditorActivity "+names);
+        return realPresenter.getUUIDListByNames(names);
+    }
+
+    // @Override
+    // public Promise<String> getUUIDListByNames(String names){
+    //     System.out.println("can it print the names in DiagramEditorActivity "+names);
+    //     return realPresenter.getUUIDListByNames(names);
+    // }
 
     @Override
     public Promise<String> getContent() {

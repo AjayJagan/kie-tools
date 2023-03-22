@@ -422,46 +422,24 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
     )
   );
 
-  // useSubscription(
-  //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
-  //   useCallback(
-  //      (colorNodesData: colorNodesData[]) => {
-  //       console.log('does it come here is the combined editor')
-  //       const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
-  //       .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
-  //       colorNodesData.forEach((nodeData:colorNodesData)=>{
-  //         swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(nodeData.nodeName).then((uuid:string)=>{
-  //           if(uuid){
-  //           swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid,nodeData.nodeColor).then(async()=>{
-  //             await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
-  //           })
-  //           }
-  //         });
-  //       });
-  //     },
-  //     [isCombinedEditorReady, diagramEditor]
-  //   )
-  // );
-  // useSubscription(
+  //best solution as of now
+  //   useSubscription(
   //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
   //   useCallback(
   //     async (colorNodesData: colorNodesData[]) => {
-  //       if(isCombinedEditorReady){
+  //       //@ts-ignore
+  //       const jsl = diagramEditor?.iframeRef.current?.contentWindow.canvas
+  //       if (isCombinedEditorReady) {
+  //         const setBgColorPromises:Promise<void>[] =[];
   //         const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
-  //         .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
-  //       const setBackgroundColorPromises: Promise<void>[] = []
-  //       console.log(1)
-  //       colorNodesData.forEach(async (nodeData: colorNodesData) => {
-  //         const uuid = await swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(nodeData.nodeName);
-  //         if(uuid){
-  //           setBackgroundColorPromises.push(swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, nodeData.nodeColor))
-  //         }
-  //       });
-  //       console.log(2);
-  //       await Promise.all(setBackgroundColorPromises);
-  //       console.log(3);
-  //       await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
-  //       console.log(4)
+  //           .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
+  //           const uuidList:string = await swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDListByNames(colorNodesData.map(nodeData=>nodeData.nodeName).join(','));
+  //           console.log(uuidList);
+  //           uuidList.split(",").forEach((uuid:string,index:number)=>{
+  //             setBgColorPromises.push(swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid,colorNodesData[index].nodeColor));
+  //           })
+  //         await Promise.all(setBgColorPromises);
+  //         jsl.draw();
   //       }
   //     },
   //     [isCombinedEditorReady, diagramEditor]
@@ -472,79 +450,29 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
     editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
     useCallback(
       async (colorNodesData: colorNodesData[]) => {
+        //@ts-ignore
+        const jsl = diagramEditor?.iframeRef.current?.contentWindow.canvas;
         if (isCombinedEditorReady) {
+          const setBgColorPromises: Promise<void>[] = [];
           const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
             .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
-          console.log(1);
-          colorNodesData.forEach(async (nodeData: colorNodesData) => {
-            const uuid = await swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(
-              nodeData.nodeName
+          const uuidList: string[] =
+            await swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDListByNames(
+              colorNodesData.map((nodeData) => nodeData.nodeName)
             );
-            if (uuid) {
-              //@ts-ignore
-              diagramEditor?.iframeRef.current?.contentWindow.canvas.setBackgroundColor(uuid, nodeData.nodeColor);
-            }
+          console.log(uuidList);
+          uuidList.forEach((uuid: string, index: number) => {
+            setBgColorPromises.push(
+              swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, colorNodesData[index].nodeColor)
+            );
           });
-          console.log(2);
-          //@ts-ignore
-          diagramEditor?.iframeRef.current?.contentWindow.canvas.draw();
-          console.log(3);
+          await Promise.all(setBgColorPromises);
+          jsl.draw();
         }
       },
       [isCombinedEditorReady, diagramEditor]
     )
   );
-  // hack
-  // useSubscription(
-  //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
-  //   useCallback(
-  //      (colorNodesData: colorNodesData[]) => {
-  //       setColorNodesData(colorNodesData)
-  //     },
-  //     [diagramEditor]
-  //   )
-  // );
-  //hack
-  // useEffect(()=>{
-  //   if(isCombinedEditorReady && colorNodesData.length>0){
-  //     const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
-  //     .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
-  //     const setBackgroundColorPromises:Promise<void>[] =[]
-  //     colorNodesData.forEach((nodeData:colorNodesData)=>{
-  //       swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(nodeData.nodeName).then((uuid:string)=>{
-  //         if(uuid){
-  //           setBackgroundColorPromises.push(swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid,nodeData.nodeColor))
-  //         }
-  //       });
-  //       console.log(setBackgroundColorPromises)
-  //       Promise.all(setBackgroundColorPromises).then(async()=>{
-  //         console.log('it comes here')
-  //         await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
-  //       })
-  //     });
-  //      swfDiagramEditorEnvelopeApi.requests.canvas_draw().then(()=>{
-  //       // do-nothing
-  //       console.log('can it draw')
-  //      }).catch((e: any)=>console.error('error while coloring the nodes',e))
-  //   }
-  // },[isCombinedEditorReady, colorNodesData]);
-
-  //hack
-  // useEffect(()=>{
-  //   if(isCombinedEditorReady && colorNodesData.length>0){
-  //     const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
-  //     .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
-  //     colorNodesData.forEach((nodeData:colorNodesData)=>{
-  //       swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDByName(nodeData.nodeName).then((uuid:string)=>{
-  //         if(uuid){
-  //         swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid,nodeData.nodeColor).then(async()=>{
-  //           await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
-  //         })
-  //         }
-  //       });
-  //     });
-  //   }
-  // },[isCombinedEditorReady, colorNodesData]);
 
   // useSubscription(
   //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,

@@ -16,9 +16,11 @@
 package org.kie.workbench.common.stunner.sw.client.editor;
 
 import java.util.ArrayList;
+//import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+//import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -28,6 +30,7 @@ import com.ait.lienzo.client.core.types.JsCanvas;
 import com.ait.lienzo.client.widget.panel.LienzoBoundsPanel;
 import com.ait.lienzo.client.widget.panel.impl.ScrollablePanel;
 import com.ait.lienzo.client.widget.panel.util.PanelTransformUtils;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.user.client.ui.IsWidget;
 import elemental2.core.JsRegExp;
 import elemental2.core.RegExpResult;
@@ -233,9 +236,33 @@ public class DiagramEditor {
     }
 
     public Promise<String> getUUIDByName(final String name) {
-    String uuid = diagramService.getMarshaller().getContext().getNameToUUIDBindings().get(name);
-    return Promise.resolve(uuid);
-}
+        String uuid = diagramService.getMarshaller().getContext().getNameToUUIDBindings().get(name);
+        return Promise.resolve(uuid);
+    }
+
+    // public Promise<List<String>> getUUIDListByNames(final String[] names) {
+    // return Promise.resolve(Arrays.stream(names)
+    //         .map(name -> diagramService.getMarshaller().getContext().getNameToUUIDBindings().get(name))
+    //         .collect(Collectors.toList()));
+    // }
+
+    public Promise<List<String>> getUUIDListByNames(final JsArrayString names) {
+         System.out.println("can it come into the DIagram editor itself "+names);
+         List<String> uuids = new ArrayList<>();
+        for (int i=0; i<names.length();i++) {
+            uuids.add(diagramService.getMarshaller().getContext().getNameToUUIDBindings().get(names.get(i)));
+        }
+
+    return Promise.resolve(uuids);
+    }
+
+    // public Promise<String> getUUIDListByNames(final String names) {
+    // final String[] nameList = names.split(",");
+    // List<String> uuids = Arrays.stream(nameList)
+    //         .map(name -> diagramService.getMarshaller().getContext().getNameToUUIDBindings().get(name))
+    //         .collect(Collectors.toList());
+    // return Promise.resolve(String.join(",",uuids));
+    // }
 
     public void onStartup(final PlaceRequest place) {
         stunnerEditor.setReadOnly(true);

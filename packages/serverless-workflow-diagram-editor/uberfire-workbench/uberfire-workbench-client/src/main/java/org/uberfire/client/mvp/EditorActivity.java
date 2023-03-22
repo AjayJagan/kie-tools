@@ -17,6 +17,7 @@ package org.uberfire.client.mvp;
 
 import java.util.List;
 
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.IsWidget;
 import elemental2.promise.Promise;
@@ -31,6 +32,9 @@ public interface EditorActivity extends Activity {
     }
 
     Promise<String> getUUIDByName(String name);
+
+    Promise<List<String>> getUUIDListByNames(JsArrayString names);
+    //Promise<String> getUUIDListByNames(String names);
 
     Promise<String> getContent();
 

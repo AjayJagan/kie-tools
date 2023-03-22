@@ -92,4 +92,12 @@ export class ServerlessWorkflowDiagramEditorEnvelopeApiImpl
   public async kogitoSwfDiagramEditor__getUUIDByName(name: string) {
     return this.getEditorOrThrowError().getUUIDByName(name);
   }
+
+  public async kogitoSwfDiagramEditor__getUUIDListByNames(names: string[]) {
+    return this.getEditorOrThrowError().getUUIDListByNames(names);
+  }
+
+  // public async kogitoSwfDiagramEditor__getUUIDListByNames(names: string) {
+  //   return this.getEditorOrThrowError().getUUIDListByNames(names);
+  // }
 }

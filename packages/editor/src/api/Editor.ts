@@ -45,4 +45,6 @@ export interface EditorApi {
   setTheme(theme: EditorTheme): Promise<void>;
   selectStateByName?(name: string): Promise<void>;
   getUUIDByName?(name: string): Promise<string>;
+  getUUIDListByNames?(names: string[]): Promise<string[]>;
+  //getUUIDListByNames?(names:string): Promise<string>
 }

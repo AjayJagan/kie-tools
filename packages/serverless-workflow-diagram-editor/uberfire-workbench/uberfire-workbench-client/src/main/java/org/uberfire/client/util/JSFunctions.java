@@ -38,6 +38,16 @@ public class JSFunctions {
             return this.instance.@org.uberfire.client.mvp.EditorActivity::getUUIDByName(Ljava/lang/String;)(name);
         };
 
+        $wnd.GWTEditor.prototype.getUUIDListByNames = function (names) {
+            console.log('this can be called here in Js functions', names);
+            return this.instance.@org.uberfire.client.mvp.EditorActivity::getUUIDListByNames(Lcom/google/gwt/core/client/JsArrayString;)(names);
+        };
+
+        // $wnd.GWTEditor.prototype.getUUIDListByNames = function (names) {
+        //     console.log('this can be called here in Js functions', names);
+        //     return this.instance.@org.uberfire.client.mvp.EditorActivity::getUUIDListByNames(Ljava/lang/String;)(names);
+        // };
+
         $wnd.GWTEditor.prototype.getContent = function () {
             return this.instance.@org.uberfire.client.mvp.EditorActivity::getContent()();
         };
@@ -69,6 +79,7 @@ public class JSFunctions {
         $wnd.GWTEditor.prototype.redo = function () {
             return this.instance.@org.uberfire.client.mvp.EditorActivity::redo()();
         };
+
         $wnd.GWTEditor.prototype.searchDomainObject = function (uuid) {
             return this.instance.@org.uberfire.client.mvp.EditorActivity::searchDomainObject(Ljava/lang/String;)(uuid);
         };

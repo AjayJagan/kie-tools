@@ -422,7 +422,6 @@ export function EditorPage(props: Props) {
       swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_moveCursorToPosition.send(
         new Position(notification.position.startLineNumber, notification.position.startColumn)
       );
-      swfEditorChannelApi.notifications.kogitoSwfCombinedEditor_combinedEditorReady;
     },
     [swfEditorChannelApi]
   );
@@ -433,11 +432,11 @@ export function EditorPage(props: Props) {
         swfEditorChannelApi?.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send([
           {
             nodeName: "squareState",
-            nodeColor: "red",
+            nodeColor: "#AFE1AF",
           },
           {
             nodeName: "finish",
-            nodeColor: "blue",
+            nodeColor: "#D3D3D3",
           },
         ]);
       });

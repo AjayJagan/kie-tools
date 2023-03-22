@@ -98,6 +98,14 @@ export class GwtEditorWrapper implements Editor {
   public getUUIDByName(name: string) {
     return this.gwtEditor.getUUIDByName(name);
   }
+  public getUUIDListByNames(names: string[]) {
+    console.log("the names in wrapper", names);
+    return this.gwtEditor.getUUIDListByNames(names);
+  }
+
+  // public getUUIDListByNames(names: string) {
+  //   return this.gwtEditor.getUUIDListByNames(names);
+  // }
 
   public getPreview(): Promise<string | undefined> {
     return this.gwtEditor.getPreview();
