@@ -246,15 +246,28 @@ public class DiagramEditor {
     //         .collect(Collectors.toList()));
     // }
 
-    public Promise<List<String>> getUUIDListByNames(final JsArrayString names) {
-         System.out.println("can it come into the DIagram editor itself "+names);
-         List<String> uuids = new ArrayList<>();
+    public Promise<JsArrayString> getUUIDListByNames(final JsArrayString names) {
+        System.out.println("can it come into the DIagram editor itself "+names);
+        String[] uuids = new String[names.length()];
         for (int i=0; i<names.length();i++) {
-            uuids.add(diagramService.getMarshaller().getContext().getNameToUUIDBindings().get(names.get(i)));
+            uuids[i] = diagramService.getMarshaller().getContext().getNameToUUIDBindings().get(names.get(i));
         }
-
-    return Promise.resolve(uuids);
+        JsArrayString array = toJsArray(uuids);
+        return Promise.resolve(array);
     }
+
+    private static JsArrayString toJsArray(String[] input) {
+        JsArrayString jsArrayString = createEmptyJsArrayString();
+        for (String s : input) {
+            jsArrayString.push(s);
+        }
+        return jsArrayString;
+    }
+
+    private static native JsArrayString createEmptyJsArrayString() /*-{
+        return [];
+    }-*/;
+
 
     // public Promise<String> getUUIDListByNames(final String names) {
     // final String[] nameList = names.split(",");

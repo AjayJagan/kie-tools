@@ -33,7 +33,7 @@ public interface EditorActivity extends Activity {
 
     Promise<String> getUUIDByName(String name);
 
-    Promise<List<String>> getUUIDListByNames(JsArrayString names);
+    Promise<JsArrayString> getUUIDListByNames(JsArrayString names);
     //Promise<String> getUUIDListByNames(String names);
 
     Promise<String> getContent();

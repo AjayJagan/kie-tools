@@ -16,7 +16,7 @@
 
 package org.kie.workbench.common.stunner.sw.client.editor;
 
-import java.util.List;
+//import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -77,7 +77,7 @@ public class DiagramEditorActivity extends AbstractActivity implements EditorAct
     }
 
     @Override
-    public Promise<List<String>> getUUIDListByNames(JsArrayString names){
+    public Promise<JsArrayString> getUUIDListByNames(JsArrayString names){
         System.out.println("can it print the names in DiagramEditorActivity "+names);
         return realPresenter.getUUIDListByNames(names);
     }

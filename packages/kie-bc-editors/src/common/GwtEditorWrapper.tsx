@@ -106,7 +106,6 @@ export class GwtEditorWrapper implements Editor {
   // public getUUIDListByNames(names: string) {
   //   return this.gwtEditor.getUUIDListByNames(names);
   // }
-
   public getPreview(): Promise<string | undefined> {
     return this.gwtEditor.getPreview();
   }
