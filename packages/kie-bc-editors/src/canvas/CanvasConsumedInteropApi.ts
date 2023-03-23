@@ -95,9 +95,4 @@ export interface CanvasConsumedInteropApi {
    * @param uuid ID attribute of a target node
    */
   centerNode(uuid: string): void;
-
-  /**
-   * draws the diagram.
-   */
-  draw(): void;
 }

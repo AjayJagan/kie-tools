@@ -57,12 +57,6 @@ export class SwfCombinedEditorChannelApiImpl implements ServerlessWorkflowCombin
     private readonly swfPreviewOptionsChannelApiImpl?: SwfPreviewOptionsChannelApi,
     private readonly swfStaticEnvelopeContentProviderChannelApi?: SwfStaticEnvelopeContentProviderChannelApi
   ) {}
-  public kogitoSwfCombinedEditor_combinedEditorReady(): void {
-    // no-op
-  }
-  public kogitoSwfCombinedEditor_colorNodesBasedOnName(_colorNodesData: colorNodesData[]): void {
-    // no-op
-  }
 
   public kogitoEditor_contentRequest(): Promise<EditorContent> {
     return this.defaultApiImpl.kogitoEditor_contentRequest();
@@ -205,6 +199,14 @@ export class SwfCombinedEditorChannelApiImpl implements ServerlessWorkflowCombin
   }
 
   public kogitoSwfCombinedEditor_moveCursorToPosition(_position: MonacoPosition): void {
+    // no-op
+  }
+
+  public kogitoSwfCombinedEditor_combinedEditorReady(): void {
+    // no-op
+  }
+
+  public kogitoSwfCombinedEditor_colorNodesBasedOnName(_colorNodesData: colorNodesData[]): void {
     // no-op
   }
 }

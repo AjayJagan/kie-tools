@@ -217,7 +217,6 @@ export function EditorPage(props: Props) {
     },
     [webToolsEditor]
   );
-
   return (
     <OnlineEditorPage>
       <PromiseStateWrapper
