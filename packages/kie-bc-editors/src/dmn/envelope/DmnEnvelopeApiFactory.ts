@@ -125,12 +125,4 @@ export class DmnEditorEnvelopeApiImpl
     }
     return editor.centerNode(uuid);
   }
-
-  public async canvas_draw() {
-    const editor = this.view().getEditor();
-    if (!editor) {
-      throw new Error("Editor not found.");
-    }
-    return editor.draw();
-  }
 }

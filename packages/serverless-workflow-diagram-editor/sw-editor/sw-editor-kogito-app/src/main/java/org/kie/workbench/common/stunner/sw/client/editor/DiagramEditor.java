@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import com.ait.lienzo.client.core.types.JsCanvas;
 import com.ait.lienzo.client.widget.panel.impl.ScrollablePanel;
 import com.ait.lienzo.client.widget.panel.util.PanelTransformUtils;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.user.client.ui.IsWidget;
 import elemental2.core.JsRegExp;
 import elemental2.core.RegExpResult;
@@ -241,6 +242,31 @@ public class DiagramEditor {
         getJsCanvas().center(uuid);
 
         return null;
+    }
+
+    public Promise<JsArrayString> getUUIDArrayByNames(final JsArrayString names) {
+        String[] uuids = new String[names.length()];
+        for (int i=0; i<names.length();i++) {
+            uuids[i] = diagramService.getMarshaller().getContext().getNameToUUIDBindings().get(names.get(i));
+        }
+        JsArrayString uuidJsArray = toJsArray(uuids);
+        return Promise.resolve(uuidJsArray);
+    }
+
+    private static JsArrayString toJsArray(String[] input) {
+        JsArrayString jsArrayString = createEmptyJsArrayString();
+        for (String s : input) {
+            jsArrayString.push(s);
+        }
+        return jsArrayString;
+    }
+
+    private static native JsArrayString createEmptyJsArrayString() /*-{
+        return [];
+    }-*/;
+
+    public void onStartup(final PlaceRequest place) {
+        stunnerEditor.setReadOnly(true);
     }
 
     public void onOpen() {

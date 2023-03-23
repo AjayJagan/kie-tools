@@ -95,9 +95,4 @@ export interface CanvasEditorApi {
    * @param uuid ID attribute of a target node
    */
   centerNode(uuid: string): Promise<void>;
-
-  /**
-   * redraws the diagram
-   */
-  draw(): Promise<void>;
 }
