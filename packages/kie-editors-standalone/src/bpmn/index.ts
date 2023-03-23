@@ -138,9 +138,6 @@ export function open(args: {
       centerNode: (uuid: string) => {
         return envelopeServer.envelopeApi.requests.canvas_centerNode(uuid);
       },
-      draw: () => {
-        return envelopeServer.envelopeApi.requests.canvas_draw();
-      },
     },
   };
 }

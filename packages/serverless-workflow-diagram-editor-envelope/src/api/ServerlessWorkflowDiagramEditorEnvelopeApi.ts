@@ -19,4 +19,5 @@ import { StunnerEditorEnvelopeAPI } from "./StunnerEditorEnvelopeAPI";
 
 export interface ServerlessWorkflowDiagramEditorEnvelopeApi extends KogitoEditorEnvelopeApi, StunnerEditorEnvelopeAPI {
   kogitoSwfDiagramEditor__highlightNode(args: { nodeName: string | null }): void;
+  kogitoSwfDiagramEditor__getUUIDArrayByNames(names: string[]): Promise<string[]>;
 }

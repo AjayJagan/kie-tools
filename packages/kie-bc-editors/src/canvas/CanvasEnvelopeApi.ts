@@ -38,6 +38,4 @@ export interface CanvasEnvelopeApi {
   canvas_applyState(uuid: string, state: string): Promise<void>;
 
   canvas_centerNode(uuid: string): Promise<void>;
-
-  canvas_draw(): Promise<void>;
 }

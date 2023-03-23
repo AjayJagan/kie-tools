@@ -161,10 +161,11 @@ export class ServerlessWorkflowDiagramEditorEnvelopeApiImpl
     return this.getEditorOrThrowError().draw();
   }
 
-  public async canvas_draw() {
-    return this.getEditorOrThrowError().draw();
-  }
   public kogitoSwfDiagramEditor__highlightNode(args: { nodeName: string }) {
     return this.getEditorOrThrowError().selectStateByName(args.nodeName);
+  }
+
+  public async kogitoSwfDiagramEditor__getUUIDArrayByNames(names: string[]) {
+    return this.getEditorOrThrowError().getUUIDArrayByNames(names);
   }
 }

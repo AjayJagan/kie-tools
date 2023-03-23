@@ -20,6 +20,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.user.client.ui.IsWidget;
 import elemental2.promise.Promise;
 import org.uberfire.client.mvp.AbstractActivity;
@@ -66,6 +67,11 @@ public class DiagramEditorActivity extends AbstractActivity implements EditorAct
     @Override
     public Promise<Void> selectStateByName(String name){
         return realPresenter.selectStateByName(name);
+    }
+
+    @Override
+    public Promise<JsArrayString> getUUIDArrayByNames(JsArrayString names){
+        return realPresenter.getUUIDArrayByNames(names);
     }
 
     @Override

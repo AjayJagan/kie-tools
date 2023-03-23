@@ -44,7 +44,8 @@ export interface GwtEditor {
   setContent(path: string, content: string): Promise<void>;
   getPreview(): Promise<string | undefined>;
   validate(): Promise<Notification[]>;
-  selectStateByName(name: string | null): Promise<void>;
+  selectStateByName(name: string): Promise<void>;
+  getUUIDArrayByNames(names: string[]): Promise<string[]>;
 }
 
 export class GwtAppFormerConsumedInteropApi {

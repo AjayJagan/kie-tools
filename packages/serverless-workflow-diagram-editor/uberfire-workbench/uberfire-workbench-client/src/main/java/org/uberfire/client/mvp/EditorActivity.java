@@ -17,6 +17,7 @@ package org.uberfire.client.mvp;
 
 import java.util.List;
 
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.IsWidget;
 import elemental2.promise.Promise;
@@ -29,6 +30,8 @@ public interface EditorActivity extends Activity {
     default Promise<Void> selectStateByName(String name) {
         throw new UnsupportedOperationException("The editor does not support state selection.");
     }
+
+    Promise<JsArrayString> getUUIDArrayByNames(JsArrayString names);
 
     Promise<String> getContent();
 

@@ -130,8 +130,6 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
 
   const [isTextEditorReady, setTextEditorReady] = useState(false);
   const [isDiagramEditorReady, setDiagramEditorReady] = useState(false);
-  //hack
-  //const [colorNodesData, setColorNodesData] = useState<colorNodesData[]>([]);
   const isVscode = useMemo(
     () => props.channelType === ChannelType.VSCODE_DESKTOP || props.channelType === ChannelType.VSCODE_WEB,
     [props.channelType]
@@ -431,29 +429,33 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
       .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>
   );
   
-  // useSubscription(
-  //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
-  //   useCallback(
-  //     (name: string) => {
-  //       console.log("the name here is", name);
-  //       console.log("the diagram editor", diagramEditor);
-  //       const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
-  //         .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
-  //       swfDiagramEditorEnvelopeApi.requests
-  //         .kogitoSwfDiagramEditor__getUUIDByName(name)
-  //         .then(async (uuid: string) => {
-  //           console.log("the uuid inside use subscription is ", uuid);
-  //           if (uuid) {
-  //             await swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, "red");
-  //             await swfDiagramEditorEnvelopeApi.requests.canvas_draw();
-  //           }
-  //         })
-  //         .catch((err) => {
-  //           console.log("an error in the get uuid", err);
-  //         });
-  //     },
-  //     [diagramEditor]
-  //   )
+  useSubscription(
+    editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
+    useCallback(
+      async (colorNodesData: colorNodesData[]) => {
+        const jsl = (diagramEditor?.iframeRef.current?.contentWindow as any)?.canvas;
+        if (isCombinedEditorReady) {
+          const setBgColorPromises: Promise<void>[] = [];
+          const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
+            .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
+          const uuidList: string[] =
+            await swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDArrayByNames(
+              colorNodesData.map((nodeData) => nodeData.nodeName)
+            );
+          uuidList.forEach((uuid: string, index: number) => {
+            if (uuid) {
+              setBgColorPromises.push(
+                swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, colorNodesData[index].nodeColor)
+              );
+            }
+          });
+          await Promise.all(setBgColorPromises);
+          jsl.draw();
+        }
+      },
+      [isCombinedEditorReady, diagramEditor]
+    )
+  );
   return (
     <div style={{ height: "100%" }}>
       <LoadingScreen loading={!isCombinedEditorReady} />
