@@ -66,6 +66,7 @@ import {
 } from "../api";
 import { useSwfDiagramEditorChannelApi } from "./hooks/useSwfDiagramEditorChannelApi";
 import { useSwfTextEditorChannelApi } from "./hooks/useSwfTextEditorChannelApi";
+import { isExited, paintExitedEndNodes } from "./helper/PaintEndNodes";
 
 interface Props {
   locale: string;
@@ -420,34 +421,125 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
     )
   );
 
+  //   const isExited=(state:any, exitedNodes:any)=> {
+  //     return exitedNodes.includes(state.name);
+  // }
+
+  //   function statePointsToAnyExitedState(stateNode:any, exitedNodes:any) {
+  //     let c1 = (diagramEditor?.iframeRef.current?.contentWindow as any)?.org.kie.workbench.common.stunner.core.graph.impl.NodeImpl.outConnectors(stateNode)
+  //         .filter((c:any) => c.getTargetNode().getContent().getDefinition() instanceof (diagramEditor?.iframeRef.current?.contentWindow as any)?.org.kie.workbench.common.stunner.sw.definition.State)
+  //         .filter((c:any) => isExited(c.getTargetNode().getContent().getDefinition(),exitedNodes))
+  //         .length;
+  //     return c1 > 0;
+  // }
+
+  //   const consumeExitedEndNodes =(stateNode:any, endNodeConsumer:any,isWorkflowCompleted:boolean, exitedNodes:any ) =>{
+  //     if (isWorkflowCompleted) {
+  //       console.log('is the workflow completed',isWorkflowCompleted)
+  //       let state = stateNode.getContent().getDefinition();
+  //       console.log('the state is ',state);
+  //       if (isExited(state,exitedNodes)) {
+  //           console.log('is this exited')
+  //           let pointsToExitedState = statePointsToAnyExitedState(stateNode, exitedNodes);
+  //           console.log('the pointsToExitedState',pointsToExitedState)
+  //           if (!pointsToExitedState) {
+  //               console.log('if not pointer to Exited state');
+  //               let outConnectors = (diagramEditor?.iframeRef.current?.contentWindow as any)?.org.kie.workbench.common.stunner.core.graph.impl.NodeImpl.outConnectors(stateNode);
+  //               outConnectors
+  //                   .filter((c:any) => c.getTargetNode().getContent().getDefinition() instanceof (diagramEditor?.iframeRef.current?.contentWindow as any)?.org.kie.workbench.common.stunner.sw.definition.End)
+  //                   .forEach((c:any) => {
+  //                       let targetEndNode = c.getTargetNode();
+  //                       endNodeConsumer(targetEndNode);
+  //                   });
+  //           }
+  //       }
+  //   }
+  //   }
+
+  //   const paintExitedEndNodes =(stateNode:any, isWorkflowCompleted:boolean, exitedNodes:any) =>{
+  //     consumeExitedEndNodes(stateNode, (node:any) => {
+  //       console.log('PAINTING EXITED END NODE:' + node.getUUID());
+  //       const jsl = (diagramEditor?.iframeRef.current?.contentWindow as any)?.canvas;
+  //       jsl.setBackgroundColor(node.getUUID(),"green");
+  //   }, isWorkflowCompleted, exitedNodes);
+  //   }
+
+  //   const paintStartAndEndNodes =(args:{colorNodesData: colorNodesData[], isWorkflowCompleted:boolean}) =>{
+  //     console.log((diagramEditor?.iframeRef.current?.contentWindow as any))
+  //     const editorSession = (diagramEditor?.iframeRef.current?.contentWindow as any)?.editor.session;
+  //     const startNode = editorSession.getNodeByName('Start');
+  //     const jsl = (diagramEditor?.iframeRef.current?.contentWindow as any)?.canvas;
+  //     jsl.setBackgroundColor(startNode.getUUID(),"green");
+  //     args.colorNodesData.forEach(node => {
+  //       let n = editorSession.getNodeByName(node.nodeName);
+  //       if (n) {
+  //           paintExitedEndNodes(n, args.isWorkflowCompleted, args.colorNodesData.map((node)=>node.nodeName));
+  //       }
+  //   }
+  // )}
+
+  // useSubscription(
+  //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
+  //   useCallback(
+  //     async (colorNodesData: colorNodesData[]) => {
+  //       console.log(colorNodesData)
+  //       const jsl = (diagramEditor?.iframeRef.current?.contentWindow as any)?.canvas;
+  //       if (isCombinedEditorReady) {
+  //         const setBgColorPromises: Promise<void>[] = [];
+  //         const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
+  //           .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
+  //         const uuidList: string[] =
+  //           await swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDArrayByNames(
+  //             colorNodesData.map((nodeData) => nodeData.nodeName)
+  //           );
+  //         uuidList.forEach((uuid: string, index: number) => {
+  //           if (uuid) {
+  //             setBgColorPromises.push(
+  //               swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, colorNodesData[index].nodeColor)
+  //             );
+  //           }
+  //         });
+  //         await Promise.all(setBgColorPromises);
+  //         paintStartAndEndNodes({colorNodesData, isWorkflowCompleted:true});
+  //         jsl.draw();
+  //       }
+  //     },
+  //     [isCombinedEditorReady, diagramEditor]
+  //   )
+  // );
+
   useSubscription(
     editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
     useCallback(
+      // should pass in isWorkflowCompleted var here
       async (colorNodesData: colorNodesData[]) => {
-        const jsl = (diagramEditor?.iframeRef.current?.contentWindow as any)?.canvas;
+        const contentWindow = diagramEditor?.iframeRef.current?.contentWindow as any;
+        const nodeNamesList = colorNodesData.map((node) => node.nodeName);
         if (isCombinedEditorReady) {
-          const setBgColorPromises: Promise<void>[] = [];
-          const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
-            .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
-          const uuidList: string[] =
-            await swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDArrayByNames(
-              colorNodesData.map((nodeData) => nodeData.nodeName)
-            );
-          uuidList.forEach((uuid: string, index: number) => {
-            if (uuid) {
-              setBgColorPromises.push(
-                swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, colorNodesData[index].nodeColor)
-              );
+          // loop through all other nodes
+          colorNodesData.forEach((nodeData: colorNodesData) => {
+            // do this since we already processed start
+            let node = contentWindow.editor.session.getNodeByName(nodeData.nodeName);
+            if (node) {
+              // paint the normal nodes
+              if (nodeData.nodeName !== "End")
+                contentWindow?.canvas.setBackgroundColor(node.getUUID(), nodeData.nodeColor);
+              paintExitedEndNodes({
+                stateNode: node,
+                isWorkflowCompleted: true, // pass this dynamically
+                contentWindow,
+                nodeColor: nodeData.nodeColor,
+                exitedNodes: nodeNamesList,
+              });
             }
           });
-          await Promise.all(setBgColorPromises);
-          jsl.draw();
+
+          contentWindow.canvas.draw();
         }
       },
       [isCombinedEditorReady, diagramEditor]
     )
   );
-
   return (
     <div style={{ height: "100%" }}>
       <LoadingScreen loading={!isCombinedEditorReady} />
