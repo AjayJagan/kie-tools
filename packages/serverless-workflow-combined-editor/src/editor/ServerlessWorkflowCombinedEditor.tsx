@@ -73,6 +73,7 @@ import {
 } from "../api";
 import { useSwfDiagramEditorChannelApi } from "./hooks/useSwfDiagramEditorChannelApi";
 import { useSwfTextEditorChannelApi } from "./hooks/useSwfTextEditorChannelApi";
+import { isExited, paintExitedEndNodes } from "./helper/PaintEndNodes";
 
 interface Props {
   locale: string;
@@ -432,25 +433,30 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
   useSubscription(
     editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
     useCallback(
+      // should pass in isWorkflowCompleted var here
       async (colorNodesData: colorNodesData[]) => {
-        const jsl = (diagramEditor?.iframeRef.current?.contentWindow as any)?.canvas;
+        const contentWindow = diagramEditor?.iframeRef.current?.contentWindow as any;
+        const nodeNamesList = colorNodesData.map((node) => node.nodeName);
         if (isCombinedEditorReady) {
-          const setBgColorPromises: Promise<void>[] = [];
-          const swfDiagramEditorEnvelopeApi = diagramEditor?.getEnvelopeServer()
-            .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>;
-          const uuidList: string[] =
-            await swfDiagramEditorEnvelopeApi.requests.kogitoSwfDiagramEditor__getUUIDArrayByNames(
-              colorNodesData.map((nodeData) => nodeData.nodeName)
-            );
-          uuidList.forEach((uuid: string, index: number) => {
-            if (uuid) {
-              setBgColorPromises.push(
-                swfDiagramEditorEnvelopeApi.requests.canvas_setBackgroundColor(uuid, colorNodesData[index].nodeColor)
-              );
+          // loop through all other nodes
+          colorNodesData.forEach((nodeData: colorNodesData) => {
+            // do this since we already processed start
+            let node = contentWindow.editor.session.getNodeByName(nodeData.nodeName);
+            if (node) {
+              // paint the normal nodes
+              if (nodeData.nodeName !== "End")
+                contentWindow?.canvas.setBackgroundColor(node.getUUID(), nodeData.nodeColor);
+              paintExitedEndNodes({
+                stateNode: node,
+                isWorkflowCompleted: true, // pass this dynamically
+                contentWindow,
+                nodeColor: nodeData.nodeColor,
+                exitedNodes: nodeNamesList,
+              });
             }
           });
-          await Promise.all(setBgColorPromises);
-          jsl.draw();
+
+          contentWindow.canvas.draw();
         }
       },
       [isCombinedEditorReady, diagramEditor]

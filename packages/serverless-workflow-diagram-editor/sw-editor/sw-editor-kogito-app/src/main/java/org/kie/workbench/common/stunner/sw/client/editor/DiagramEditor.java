@@ -312,10 +312,6 @@ public class DiagramEditor {
         return [];
     }-*/;
 
-    public void onStartup(final PlaceRequest place) {
-        stunnerEditor.setReadOnly(true);
-    }
-
     public void onOpen() {
     }
 

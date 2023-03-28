@@ -121,6 +121,45 @@ const RefForwardingSwfChannelComponent: ForwardRefRenderFunction<
     [editor]
   );
 
+  const messageBusClient = useMemo(() => {
+    return editor.getEnvelopeServer()
+      .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowCombinedEditorChannelApi>;
+  }, [editor]);
+
+  useEffect(() => {
+    if (messageBusClient) {
+      console.log("does it come here");
+      messageBusClient.notifications.kogitoSwfCombinedEditor_combinedEditorReady.subscribe(() => {
+        messageBusClient?.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send([
+          {
+            nodeName: "Start",
+            nodeColor: "#AFE1AF",
+          },
+          {
+            nodeName: "printStatus",
+            nodeColor: "#AFE1AF",
+          },
+          {
+            nodeName: "branch",
+            nodeColor: "#AFE1AF",
+          },
+          {
+            nodeName: "finish_not_compensate",
+            nodeColor: "#AFE1AF",
+          },
+          {
+            nodeName: "End",
+            nodeColor: "#AFE1AF",
+          },
+          {
+            nodeName: "End",
+            nodeColor: "#AFE1AF",
+          },
+        ]);
+      });
+    }
+  }, [messageBusClient]);
+
   useImperativeHandle(
     fowardedRef,
     () => {
