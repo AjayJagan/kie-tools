@@ -19,17 +19,16 @@ export const paintExitedEndNodes = (args: {
   isWorkflowCompleted: boolean;
   contentWindow: any;
   nodeColor: string;
-  exitedNodes: string[];
+  //exitedNodes: string[];
 }) => {
   consumeExitedEndNodes({
     stateNode: args.stateNode,
     contentWindow: args.contentWindow,
     endNodeConsumer: (node: any) => {
-      console.log("PAINTING EXITED END NODE:" + node.getUUID());
       args.contentWindow?.canvas.setBackgroundColor(node.getUUID(), args.nodeColor);
     },
     isWorkflowCompleted: args.isWorkflowCompleted,
-    exitedNodes: args.exitedNodes,
+    //exitedNodes: args.exitedNodes,
   });
 };
 
@@ -38,54 +37,50 @@ const consumeExitedEndNodes = (args: {
   contentWindow: any;
   endNodeConsumer: any;
   isWorkflowCompleted: boolean;
-  exitedNodes: string[];
+  // exitedNodes: string[];
 }) => {
   if (args.isWorkflowCompleted) {
-    console.log("is the workflow completed", args.isWorkflowCompleted);
     let state = args.stateNode.getContent().getDefinition();
-    console.log("the state is ", state);
-    if (isExited(state, args.exitedNodes)) {
-      console.log("is this exited");
-      let pointsToExitedState = statePointsToAnyExitedState({
-        stateNode: args.stateNode,
-        exitedNodes: args.exitedNodes,
-        contentWindow: args.contentWindow,
-      });
-      console.log("the pointsToExitedState", pointsToExitedState);
-      if (!pointsToExitedState) {
-        console.log("this is the current node here", args.stateNode.getContent().getDefinition());
-        let outConnectors = args.contentWindow?.org.kie.workbench.common.stunner.core.graph.impl.NodeImpl.outConnectors(
-          args.stateNode
-        );
-        outConnectors
-          .filter((c: any) => {
-            console.log("the c in filter", c);
-            return (
-              c.getTargetNode().getContent().getDefinition() instanceof
-              args.contentWindow?.org.kie.workbench.common.stunner.sw.definition.End
-            );
-          })
-          .forEach((c: any) => {
-            console.log("the end targets", c);
-            let targetEndNode = c.getTargetNode();
-            args.endNodeConsumer(targetEndNode);
-          });
-      }
+    //if (isExited(state, args.exitedNodes)) {
+    if (state.getName() !== "End") {
+      args.endNodeConsumer(args.stateNode);
     }
+    let pointsToExitedState = statePointsToAnyExitedState({
+      stateNode: args.stateNode,
+      //exitedNodes: args.exitedNodes,
+      contentWindow: args.contentWindow,
+    });
+    if (!pointsToExitedState) {
+      let outConnectors = args.contentWindow?.org.kie.workbench.common.stunner.core.graph.impl.NodeImpl.outConnectors(
+        args.stateNode
+      );
+      outConnectors
+        .filter((c: any) => {
+          return (
+            c.getTargetNode().getContent().getDefinition() instanceof
+            args.contentWindow?.org.kie.workbench.common.stunner.sw.definition.End
+          );
+        })
+        .forEach((c: any) => {
+          let targetEndNode = c.getTargetNode();
+          args.endNodeConsumer(targetEndNode);
+        });
+    }
+    // }
   }
 };
 
-const statePointsToAnyExitedState = (args: { stateNode: any; exitedNodes: string[]; contentWindow: any }) => {
-  let c1 = args.contentWindow?.org.kie.workbench.common.stunner.core.graph.impl.NodeImpl.outConnectors(args.stateNode)
-    .filter(
-      (c: any) =>
-        c.getTargetNode().getContent().getDefinition() instanceof
-        args.contentWindow?.org.kie.workbench.common.stunner.sw.definition.State
-    )
-    .filter((c: any) => isExited(c.getTargetNode().getContent().getDefinition(), args.exitedNodes)).length;
+const statePointsToAnyExitedState = (args: { stateNode: any; contentWindow: any }) => {
+  let c1 = args.contentWindow?.org.kie.workbench.common.stunner.core.graph.impl.NodeImpl.outConnectors(
+    args.stateNode
+  ).filter(
+    (c: any) =>
+      c.getTargetNode().getContent().getDefinition() instanceof
+      args.contentWindow?.org.kie.workbench.common.stunner.sw.definition.State
+  ).length;
   return c1 > 0;
 };
 
-export const isExited = (state: any, exitedNodes: any) => {
-  return exitedNodes.includes(state.name);
-};
+// export const isExited = (state: any, exitedNodes: any) => {
+//   return exitedNodes.includes(state.name);
+// };
