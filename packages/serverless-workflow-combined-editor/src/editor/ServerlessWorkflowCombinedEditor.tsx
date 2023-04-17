@@ -73,7 +73,7 @@ import {
 } from "../api";
 import { useSwfDiagramEditorChannelApi } from "./hooks/useSwfDiagramEditorChannelApi";
 import { useSwfTextEditorChannelApi } from "./hooks/useSwfTextEditorChannelApi";
-import { isExited, paintExitedEndNodes } from "./helper/PaintEndNodes";
+import { paintExitedEndNodes } from "./helper/PaintEndNodes";
 
 interface Props {
   locale: string;
@@ -440,18 +440,17 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
         if (isCombinedEditorReady) {
           // loop through all other nodes
           colorNodesData.forEach((nodeData: colorNodesData) => {
-            // do this since we already processed start
             let node = contentWindow.editor.session.getNodeByName(nodeData.nodeName);
             if (node) {
               // paint the normal nodes
-              if (nodeData.nodeName !== "End")
-                contentWindow?.canvas.setBackgroundColor(node.getUUID(), nodeData.nodeColor);
+              // if (nodeData.nodeName !== "End")
+              //   contentWindow?.canvas.setBackgroundColor(node.getUUID(), nodeData.nodeColor);
               paintExitedEndNodes({
                 stateNode: node,
                 isWorkflowCompleted: true, // pass this dynamically
                 contentWindow,
                 nodeColor: nodeData.nodeColor,
-                exitedNodes: nodeNamesList,
+                //exitedNodes: nodeNamesList,
               });
             }
           });

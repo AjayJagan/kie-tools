@@ -144,7 +144,15 @@ const RefForwardingSwfChannelComponent: ForwardRefRenderFunction<
             nodeColor: "#AFE1AF",
           },
           {
-            nodeName: "finish_not_compensate",
+            nodeName: "finish_compensate",
+            nodeColor: "#AFE1AF",
+          },
+          {
+            nodeName: "compensating",
+            nodeColor: "#AFE1AF",
+          },
+          {
+            nodeName: "compensating_more",
             nodeColor: "#AFE1AF",
           },
           {
