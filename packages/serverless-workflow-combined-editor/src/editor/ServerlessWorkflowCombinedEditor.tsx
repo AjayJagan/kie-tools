@@ -24,7 +24,12 @@ import {
   useKogitoEditorEnvelopeContext,
 } from "@kie-tools-core/editor/dist/api";
 import { EmbeddedEditorFile } from "@kie-tools-core/editor/dist/channel";
-import { EmbeddedEditor, useEditorRef, useStateControlSubscription } from "@kie-tools-core/editor/dist/embedded";
+import {
+  EmbeddedEditor,
+  EmbeddedEditorRef,
+  useEditorRef,
+  useStateControlSubscription,
+} from "@kie-tools-core/editor/dist/embedded";
 import { LoadingScreen } from "@kie-tools-core/editor/dist/envelope";
 import { MessageBusClientApi } from "@kie-tools-core/envelope-bus/dist/api";
 import { useSharedValue, useSubscription } from "@kie-tools-core/envelope-bus/dist/hooks";
@@ -34,6 +39,8 @@ import {
   ServerlessWorkflowDiagramEditorChannelApi,
   ServerlessWorkflowDiagramEditorEnvelopeApi,
 } from "@kie-tools/serverless-workflow-diagram-editor-envelope/dist/api";
+import { SwfStunnerEditorAPI } from "@kie-tools/serverless-workflow-diagram-editor-envelope/dist/api/SwfStunnerEditorAPI";
+import { SwfStunnerEditor } from "@kie-tools/serverless-workflow-diagram-editor-envelope/dist/envelope/ServerlessWorkflowStunnerEditor";
 import {
   ServerlessWorkflowTextEditorChannelApi,
   ServerlessWorkflowTextEditorEnvelopeApi,
@@ -80,6 +87,12 @@ interface File {
 }
 
 const ENVELOPE_LOCATOR_TYPE = "swf";
+
+declare global {
+  interface Window {
+    editor: SwfStunnerEditorAPI;
+  }
+}
 
 const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
   ServerlessWorkflowCombinedEditorRef | undefined,
@@ -398,6 +411,11 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
       },
       [textEditor]
     )
+  );
+
+  window.editor = new SwfStunnerEditor(
+    diagramEditor?.getEnvelopeServer()
+      .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>
   );
 
   return (
