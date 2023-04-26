@@ -91,7 +91,7 @@ export class GwtEditorWrapper implements Editor {
     return this.gwtEditor.setContent(path, content.trim());
   }
 
-  public selectStateByName(name: string | null) {
+  public selectStateByName(name: string) {
     return this.gwtEditor.selectStateByName(name);
   }
 
