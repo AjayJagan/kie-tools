@@ -44,9 +44,12 @@ import {
   switchStateCompletion,
   workflowCompletion,
 } from "../assets/code-completions";
-import * as swfModelQueries from "./modelQueries";
-import { SwfLanguageServiceConfig } from "./SwfLanguageService";
+
+import { nodeUpUntilType } from "./nodeUpUntilType";
+import { findNodeAtLocation, SwfLanguageServiceConfig } from "./SwfLanguageService";
 import { JqCompletions } from "./types";
+import { jqBuiltInFunctions } from "@kie-tools/serverless-workflow-jq-expressions/dist/utils";
+import { parseApiContent } from "@kie-tools/serverless-workflow-service-catalog/dist/channel";
 
 type SwfCompletionItemServiceCatalogFunction = SwfServiceCatalogFunction & { operation: string };
 export type SwfCompletionItemServiceCatalogService = Omit<SwfServiceCatalogService, "functions"> & {
@@ -158,14 +161,35 @@ const getJqInputVariablesCompletions: JqFunctionCompletion = async function getJ
     findNodeAtLocation(args.rootNode, ["functions"])?.children as ELsNode[]
   );
   const dataInputSchemaPath = findNodeAtLocation(args.rootNode, ["dataInputSchema"])?.value;
+  console.log("does it come here --->", dataInputSchemaPath);
+  let inlineSchemaData;
   if (dataInputSchemaPath) {
-    if (isRemotePath(dataInputSchemaPath)) {
-      remoteList.push(dataInputSchemaPath);
+    if (typeof JSON.parse(dataInputSchemaPath) === "object") {
+      //logic for resolving the obj
+      inlineSchemaData = Object.entries(
+        parseApiContent({
+          serviceFileName: `inilineSchema.${dataInputSchemaPath.startsWith("{") ? "json" : "yaml"}`,
+          serviceFileContent: dataInputSchemaPath,
+          source: {
+            type: SwfCatalogSourceType.LOCAL_FS,
+            absoluteFilePath: ".",
+          },
+        }).functions[0].arguments
+      ).map((val) => {
+        return {
+          [val[0]]: val[1],
+        };
+      });
+      console.log(inlineSchemaData);
     } else {
-      relativeList.push(dataInputSchemaPath);
+      if (isRemotePath(dataInputSchemaPath)) {
+        remoteList.push(dataInputSchemaPath);
+      } else {
+        relativeList.push(dataInputSchemaPath);
+      }
     }
   }
-  if (remoteList.length > 0 || relativeList.length > 0) {
+  if (remoteList.length > 0 || relativeList.length > 0 || inlineSchemaData) {
     const schemaData = await Promise.all([
       ...(await args.jqCompletions.remote.getJqAutocompleteProperties({
         textDocument: args.document,
@@ -175,7 +199,9 @@ const getJqInputVariablesCompletions: JqFunctionCompletion = async function getJ
         textDocument: args.document,
         schemaPaths: relativeList ?? [],
       })),
+      ...(inlineSchemaData as any),
     ]);
+    console.log("schema data", schemaData);
     if (schemaData.length === 0) {
       return Promise.resolve([]);
     }
