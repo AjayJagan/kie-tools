@@ -429,36 +429,71 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
     diagramEditor?.getEnvelopeServer()
       .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>
   );
-  
+
+  // useSubscription(
+  //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
+  //   useCallback(
+  //     // should pass in isWorkflowCompleted var here
+  //     async (colorNodesData: colorNodesData[]) => {
+  //       //const contentWindow = diagramEditor?.iframeRef.current?.contentWindow as any;
+  //       //colorNodesData.forEach((node) => node.nodeName);
+  //       if (isCombinedEditorReady) {
+  //         // loop through all other nodes
+  //         colorNodesData.forEach(async(nodeData: colorNodesData) => {
+  //           // do this since we already processed start
+  //           let node = await window.editor.session.getNodeByName(nodeData.nodeName);
+  //           if (node) {
+  //             // paint the normal nodes
+  //             if (nodeData.nodeName !== "End")
+  //               await window.editor?.canvas.setBackgroundColor(node.uuid, nodeData.nodeColor);
+  //             // paintExitedEndNodes({
+  //             //   stateNode: node,
+  //             //   isWorkflowCompleted: true, // pass this dynamically
+  //             //   contentWindow: window.editor,
+  //             //   nodeColor: nodeData.nodeColor,
+  //             //   //exitedNodes: nodeNamesList,
+  //             // });
+  //           }
+  //         });
+
+  //         await window.editor.canvas.draw();
+  //       }
+  //     },
+  //     [isCombinedEditorReady, diagramEditor]
+  //   )
+  // );
+
   useSubscription(
     editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
     useCallback(
       // should pass in isWorkflowCompleted var here
       async (colorNodesData: colorNodesData[]) => {
-        const contentWindow = diagramEditor?.iframeRef.current?.contentWindow as any;
-        const nodeNamesList = colorNodesData.map((node) => node.nodeName);
-        if (isCombinedEditorReady) {
-          // loop through all other nodes
-          colorNodesData.forEach((nodeData: colorNodesData) => {
-            let node = contentWindow.editor.session.getNodeByName(nodeData.nodeName);
+        if (isDiagramEditorReady) {
+          for (const nodeData of colorNodesData) {
+            let node = await window.editor.session.getNodeByName(nodeData.nodeName);
+            window.editor.session.getNodeByUUID;
             if (node) {
-              // paint the normal nodes
-              // if (nodeData.nodeName !== "End")
-              //   contentWindow?.canvas.setBackgroundColor(node.getUUID(), nodeData.nodeColor);
+              if (nodeData.nodeName !== "End") {
+                await window.editor?.canvas.setBackgroundColor(node.uuid, nodeData.nodeColor);
+              }
+              node.outEdges.forEach((c) => {
+                console.log(c.definition.id);
+              });
+              node.inEdges.forEach((c) => {
+                console.log(c.definition.id);
+              });
               paintExitedEndNodes({
                 stateNode: node,
-                isWorkflowCompleted: true, // pass this dynamically
-                contentWindow,
+                isWorkflowCompleted: true,
+                contentWindow: window.editor,
                 nodeColor: nodeData.nodeColor,
-                //exitedNodes: nodeNamesList,
               });
             }
-          });
-
-          contentWindow.canvas.draw();
+          }
+          await window.editor.canvas.draw();
         }
       },
-      [isCombinedEditorReady, diagramEditor]
+      [isCombinedEditorReady, isDiagramEditorReady]
     )
   );
   return (

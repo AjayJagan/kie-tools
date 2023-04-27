@@ -14,35 +14,38 @@
  * limitations under the License.
  */
 
+import { Edge, Node } from "@kie-tools/serverless-workflow-diagram-editor-envelope/dist/api/StunnerEditorEnvelopeAPI";
+import { SwfStunnerEditorAPI } from "@kie-tools/serverless-workflow-diagram-editor-envelope/dist/api/SwfStunnerEditorAPI";
+
 export const paintExitedEndNodes = (args: {
-  stateNode: any;
+  stateNode: Node;
   isWorkflowCompleted: boolean;
-  contentWindow: any;
+  contentWindow: SwfStunnerEditorAPI;
   nodeColor: string;
   //exitedNodes: string[];
 }) => {
   consumeExitedEndNodes({
     stateNode: args.stateNode,
     contentWindow: args.contentWindow,
-    endNodeConsumer: (node: any) => {
-      args.contentWindow?.canvas.setBackgroundColor(node.getUUID(), args.nodeColor);
+    endNodeConsumer: async (uuid: string) => {
+      await args.contentWindow.canvas.setBackgroundColor(uuid, args.nodeColor);
     },
     isWorkflowCompleted: args.isWorkflowCompleted,
     //exitedNodes: args.exitedNodes,
   });
 };
 
-const consumeExitedEndNodes = (args: {
-  stateNode: any;
-  contentWindow: any;
+const consumeExitedEndNodes = async (args: {
+  stateNode: Node;
+  contentWindow: SwfStunnerEditorAPI;
   endNodeConsumer: any;
   isWorkflowCompleted: boolean;
   // exitedNodes: string[];
 }) => {
   if (args.isWorkflowCompleted) {
-    let state = args.stateNode.getContent().getDefinition();
+    let state = args.stateNode.definition;
     //if (isExited(state, args.exitedNodes)) {
-    if (state.getName() !== "End") {
+    if (state.name !== "End") {
       args.endNodeConsumer(args.stateNode);
     }
     let pointsToExitedState = statePointsToAnyExitedState({
@@ -51,34 +54,43 @@ const consumeExitedEndNodes = (args: {
       contentWindow: args.contentWindow,
     });
     if (!pointsToExitedState) {
-      let outConnectors = args.contentWindow?.org.kie.workbench.common.stunner.core.graph.impl.NodeImpl.outConnectors(
-        args.stateNode
-      );
-      outConnectors
-        .filter((c: any) => {
-          return (
-            c.getTargetNode().getContent().getDefinition() instanceof
-            args.contentWindow?.org.kie.workbench.common.stunner.sw.definition.End
-          );
-        })
-        .forEach((c: any) => {
-          let targetEndNode = c.getTargetNode();
-          args.endNodeConsumer(targetEndNode);
+      args.stateNode.outEdges
+        .filter((c: Edge) => c.definition.id === "org.kie.workbench.common.stunner.sw.definition.End")
+        .forEach((c: Edge) => {
+          args.endNodeConsumer(c.uuid);
         });
+      // let outConnectors = await args.contentWindow?.session..outConnectors(
+      //   args.stateNode
+      // );
+      // outConnectors
+      //   .filter((c: any) => {
+      //     return (
+      //       c.getTargetNode().getContent().getDefinition() instanceof
+      //       args.contentWindow?.org.kie.workbench.common.stunner.sw.definition.End
+      //     );
+      //   })
+      //   .forEach((c: any) => {
+      //     let targetEndNode = c.getTargetNode();
+      //     args.endNodeConsumer(targetEndNode);
+      //   });
     }
     // }
   }
 };
 
-const statePointsToAnyExitedState = (args: { stateNode: any; contentWindow: any }) => {
-  let c1 = args.contentWindow?.org.kie.workbench.common.stunner.core.graph.impl.NodeImpl.outConnectors(
-    args.stateNode
-  ).filter(
-    (c: any) =>
-      c.getTargetNode().getContent().getDefinition() instanceof
-      args.contentWindow?.org.kie.workbench.common.stunner.sw.definition.State
+const statePointsToAnyExitedState = (args: { stateNode: Node; contentWindow: SwfStunnerEditorAPI }) => {
+  let c1 = args.stateNode.outEdges.filter(
+    (c: Edge) => c.definition.id === "org.kie.workbench.common.stunner.sw.definition.State"
   ).length;
   return c1 > 0;
+  // let c1 = await args.contentWindow?.org.kie.workbench.common.stunner.core.graph.impl.NodeImpl.outConnectors(
+  //   args.stateNode
+  // ).filter(
+  //   (c: any) =>
+  //     c.getTargetNode().getContent().getDefinition() instanceof
+  //     args.contentWindow?.org.kie.workbench.common.stunner.sw.definition.State
+  // ).length;
+  // return c1 > 0;
 };
 
 // export const isExited = (state: any, exitedNodes: any) => {
