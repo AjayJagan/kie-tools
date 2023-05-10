@@ -44,7 +44,6 @@ import {
   SwfFeatureToggleChannelApi,
   SwfPreviewOptions,
   SwfPreviewOptionsChannelApi,
-  colorNodesData,
 } from "../api";
 import { SwfStaticEnvelopeContentProviderChannelApi } from "../api/SwfStaticEnvelopeContentProviderChannelApi";
 
@@ -206,7 +205,7 @@ export class SwfCombinedEditorChannelApiImpl implements ServerlessWorkflowCombin
     // no-op
   }
 
-  public kogitoSwfCombinedEditor_colorNodesBasedOnName(_colorNodesData: colorNodesData[]): void {
+  public kogitoSwfCombinedEditor_colorNodesBasedOnName(_nodesToColor: string[], isWorkflowCompleted: boolean): void {
     // no-op
   }
 }

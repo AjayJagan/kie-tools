@@ -65,15 +65,10 @@ import {
   useState,
 } from "react";
 import { Position } from "monaco-editor";
-import {
-  colorNodesData,
-  ServerlessWorkflowCombinedEditorChannelApi,
-  SwfFeatureToggle,
-  SwfPreviewOptions,
-} from "../api";
+import { ServerlessWorkflowCombinedEditorChannelApi, SwfFeatureToggle, SwfPreviewOptions } from "../api";
 import { useSwfDiagramEditorChannelApi } from "./hooks/useSwfDiagramEditorChannelApi";
 import { useSwfTextEditorChannelApi } from "./hooks/useSwfTextEditorChannelApi";
-import { paintExitedEndNodes } from "./helper/PaintEndNodes";
+import { paintCompletedNodes } from "./helper/PaintNodes";
 
 interface Props {
   locale: string;
@@ -424,76 +419,25 @@ const RefForwardingServerlessWorkflowCombinedEditor: ForwardRefRenderFunction<
       [textEditor]
     )
   );
-
-  window.editor = new SwfStunnerEditor(
-    diagramEditor?.getEnvelopeServer()
-      .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>
+  window.editor = useMemo(
+    () =>
+      new SwfStunnerEditor(
+        diagramEditor?.getEnvelopeServer()
+          .envelopeApi as unknown as MessageBusClientApi<ServerlessWorkflowDiagramEditorEnvelopeApi>
+      ),
+    [diagramEditor]
   );
-
-  // useSubscription(
-  //   editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
-  //   useCallback(
-  //     // should pass in isWorkflowCompleted var here
-  //     async (colorNodesData: colorNodesData[]) => {
-  //       //const contentWindow = diagramEditor?.iframeRef.current?.contentWindow as any;
-  //       //colorNodesData.forEach((node) => node.nodeName);
-  //       if (isCombinedEditorReady) {
-  //         // loop through all other nodes
-  //         colorNodesData.forEach(async(nodeData: colorNodesData) => {
-  //           // do this since we already processed start
-  //           let node = await window.editor.session.getNodeByName(nodeData.nodeName);
-  //           if (node) {
-  //             // paint the normal nodes
-  //             if (nodeData.nodeName !== "End")
-  //               await window.editor?.canvas.setBackgroundColor(node.uuid, nodeData.nodeColor);
-  //             // paintExitedEndNodes({
-  //             //   stateNode: node,
-  //             //   isWorkflowCompleted: true, // pass this dynamically
-  //             //   contentWindow: window.editor,
-  //             //   nodeColor: nodeData.nodeColor,
-  //             //   //exitedNodes: nodeNamesList,
-  //             // });
-  //           }
-  //         });
-
-  //         await window.editor.canvas.draw();
-  //       }
-  //     },
-  //     [isCombinedEditorReady, diagramEditor]
-  //   )
-  // );
 
   useSubscription(
     editorEnvelopeCtx.channelApi.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName,
     useCallback(
       // should pass in isWorkflowCompleted var here
-      async (colorNodesData: colorNodesData[]) => {
+      async (nodesToColor: string[], isWorkflowCompleted) => {
         if (isDiagramEditorReady) {
-          for (const nodeData of colorNodesData) {
-            let node = await window.editor.session.getNodeByName(nodeData.nodeName);
-            window.editor.session.getNodeByUUID;
-            if (node) {
-              if (nodeData.nodeName !== "End") {
-                await window.editor?.canvas.setBackgroundColor(node.uuid, nodeData.nodeColor);
-              }
-              node.outEdges.forEach((c) => {
-                console.log(c.definition.id);
-              });
-              node.inEdges.forEach((c) => {
-                console.log(c.definition.id);
-              });
-              paintExitedEndNodes({
-                stateNode: node,
-                isWorkflowCompleted: true,
-                contentWindow: window.editor,
-                nodeColor: nodeData.nodeColor,
-              });
-            }
-          }
-          await window.editor.canvas.draw();
+          paintCompletedNodes(nodesToColor, isWorkflowCompleted);
         }
       },
-      [isCombinedEditorReady, isDiagramEditorReady]
+      [isDiagramEditorReady]
     )
   );
   return (

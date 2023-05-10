@@ -130,40 +130,10 @@ const RefForwardingSwfChannelComponent: ForwardRefRenderFunction<
     if (messageBusClient) {
       console.log("does it come here");
       messageBusClient.notifications.kogitoSwfCombinedEditor_combinedEditorReady.subscribe(() => {
-        messageBusClient?.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send([
-          {
-            nodeName: "Start",
-            nodeColor: "#AFE1AF",
-          },
-          {
-            nodeName: "printStatus",
-            nodeColor: "#AFE1AF",
-          },
-          {
-            nodeName: "branch",
-            nodeColor: "#AFE1AF",
-          },
-          {
-            nodeName: "finish_compensate",
-            nodeColor: "#AFE1AF",
-          },
-          {
-            nodeName: "compensating",
-            nodeColor: "#AFE1AF",
-          },
-          {
-            nodeName: "compensating_more",
-            nodeColor: "#AFE1AF",
-          },
-          {
-            nodeName: "End",
-            nodeColor: "#AFE1AF",
-          },
-          {
-            nodeName: "End",
-            nodeColor: "#AFE1AF",
-          },
-        ]);
+        messageBusClient?.notifications.kogitoSwfCombinedEditor_colorNodesBasedOnName.send(
+          ["Start", "printStatus", "branch", "finish_compensate", "compensating", "compensating_more", "End", "End"],
+          true
+        );
       });
     }
   }, [messageBusClient]);

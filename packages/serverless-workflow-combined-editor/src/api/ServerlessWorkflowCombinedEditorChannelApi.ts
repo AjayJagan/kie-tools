@@ -20,11 +20,6 @@ import { SwfLanguageServiceChannelApi } from "@kie-tools/serverless-workflow-lan
 import { SwfFeatureToggleChannelApi } from "./SwfFeatureToggleChannelApi";
 import { SwfPreviewOptionsChannelApi } from "./SwfPreviewOptionsChannelApi";
 import { SwfStaticEnvelopeContentProviderChannelApi } from "./SwfStaticEnvelopeContentProviderChannelApi";
-
-export interface colorNodesData {
-  nodeName: string;
-  nodeColor: string;
-}
 export interface ServerlessWorkflowCombinedEditorChannelApi
   extends KogitoEditorChannelApi,
     SwfFeatureToggleChannelApi,
@@ -38,6 +33,6 @@ export interface ServerlessWorkflowCombinedEditorChannelApi
    * @returns
    */
   kogitoSwfCombinedEditor_moveCursorToPosition(position: Position): void;
-  kogitoSwfCombinedEditor_colorNodesBasedOnName(colorNodesData: colorNodesData[]): void;
+  kogitoSwfCombinedEditor_colorNodesBasedOnName(nodesToColor: string[], isWorkflowCompleted: boolean): void;
   kogitoSwfCombinedEditor_combinedEditorReady(): void;
 }
