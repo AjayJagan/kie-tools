@@ -25,6 +25,7 @@ import { StandaloneSwfLanguageServiceChannelApiImpl } from "./StandaloneSwfLangu
 import { JqExpressionReadSchemasImpl } from "@kie-tools/serverless-workflow-jq-expressions/dist/impl";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { removeDuplicatedKeyValuePairs } from "@kie-tools/serverless-workflow-jq-expressions/dist/utils";
+import { JqExpressionContentType } from "@kie-tools/serverless-workflow-jq-expressions/dist/api";
 
 const getDefaultLsArgs = (
   configOverrides: Partial<SwfLanguageServiceArgs["config"]>
@@ -56,6 +57,13 @@ const getDefaultLsArgs = (
       },
       relative: {
         getJqAutocompleteProperties: (_args: any) => Promise.resolve([]),
+        getSchemaPropertiesFromInputSchema: async (
+          args: JqExpressionContentType
+        ): Promise<Record<string, string>[]> => {
+          const jqExpressionReadSchema = new JqExpressionReadSchemasImpl();
+          console.error("this is the schemaaaaaa", args.fileName);
+          return removeDuplicatedKeyValuePairs(jqExpressionReadSchema.parseSchemaProperties([args]));
+        },
       },
     },
     config: {

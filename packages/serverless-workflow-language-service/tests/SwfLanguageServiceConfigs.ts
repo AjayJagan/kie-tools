@@ -69,5 +69,8 @@ export const defaultConfig: SwfLanguageServiceConfig = {
 
 export const defaultJqCompletionsConfig: JqCompletions = {
   remote: { getJqAutocompleteProperties: async (_args) => [] },
-  relative: { getJqAutocompleteProperties: async (_args) => [] },
+  relative: {
+    getJqAutocompleteProperties: async (_args) => [],
+    getSchemaPropertiesFromInputSchema: async (_args: any) => [],
+  },
 };

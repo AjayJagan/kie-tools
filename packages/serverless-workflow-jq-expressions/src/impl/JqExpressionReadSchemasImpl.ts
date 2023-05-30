@@ -53,6 +53,7 @@ export class JqExpressionReadSchemasImpl implements JqExpressionReadSchemas {
       return [];
     }
   }
+
   public parseSchemaProperties(contentArray: JqExpressionContentType[]): Record<string, string>[] {
     return contentArray.flatMap((content: JqExpressionContentType) =>
       this.getEachProperties({

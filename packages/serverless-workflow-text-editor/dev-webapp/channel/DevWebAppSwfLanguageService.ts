@@ -75,6 +75,7 @@ export class DevWebAppSwfLanguageService {
         },
         relative: {
           getJqAutocompleteProperties: (_args: any) => Promise.resolve([]),
+          getSchemaPropertiesFromInputSchema: (_args: any) => Promise.resolve([]),
         },
       },
     };

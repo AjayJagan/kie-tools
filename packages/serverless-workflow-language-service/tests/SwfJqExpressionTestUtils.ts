@@ -28,6 +28,7 @@ const languageServiceArgs = {
     relative: {
       getJqAutocompleteProperties: async (_args: any) =>
         [{ avgLoad: "string" }, { numberOfPods: "1" }] as Record<string, string>[],
+      getSchemaPropertiesFromInputSchema: async (_args: any) => [],
     },
   },
 };

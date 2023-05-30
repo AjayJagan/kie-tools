@@ -6803,6 +6803,9 @@ importers:
       "@severlessworkflow/sdk-typescript":
         specifier: ^3.0.3
         version: 3.0.3
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
       json-to-ast:
         specifier: ^2.1.0
         version: 2.1.0

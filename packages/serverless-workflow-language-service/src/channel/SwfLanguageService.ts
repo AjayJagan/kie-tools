@@ -39,6 +39,7 @@ import {
 import { SwfLanguageServiceCodeLenses } from "./SwfLanguageServiceCodeLenses";
 import { swfRefValidationMap } from "./swfRefValidationMap";
 import { CodeCompletionStrategy } from "./types";
+import { JqExpressionContentType } from "@kie-tools/serverless-workflow-jq-expressions/dist/api";
 
 export type SwfLanguageServiceConfig = {
   shouldConfigureServiceRegistries: () => boolean; //TODO: See https://issues.redhat.com/browse/KOGITO-7107
@@ -80,6 +81,7 @@ export type SwfLanguageServiceArgs = EditorLanguageServiceArgs & {
         textDocument: TextDocument;
         schemaPaths: string[];
       }) => Promise<Record<string, string>[]>;
+      getSchemaPropertiesFromInputSchema: (args: JqExpressionContentType) => Promise<Record<string, string>[]>;
     };
   };
   config: SwfLanguageServiceConfig;

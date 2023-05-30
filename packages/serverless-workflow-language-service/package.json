@@ -30,6 +30,7 @@
     "@kie-tools/serverless-workflow-service-catalog": "workspace:*",
     "@kie-tools/yaml-language-server": "workspace:*",
     "@severlessworkflow/sdk-typescript": "^3.0.3",
+    "js-yaml": "^4.1.0",
     "json-to-ast": "^2.1.0",
     "jsonata": "^1.8.3",
     "jsonc-parser": "^3.0.0",

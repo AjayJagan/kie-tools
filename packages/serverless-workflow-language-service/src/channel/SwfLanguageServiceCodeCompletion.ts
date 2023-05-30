@@ -44,13 +44,11 @@ import {
   switchStateCompletion,
   workflowCompletion,
 } from "../assets/code-completions";
-
-import { nodeUpUntilType } from "./nodeUpUntilType";
-import { findNodeAtLocation, SwfLanguageServiceConfig } from "./SwfLanguageService";
+import * as swfModelQueries from "./modelQueries";
+import { SwfLanguageServiceConfig } from "./SwfLanguageService";
 import { JqCompletions } from "./types";
-import { jqBuiltInFunctions } from "@kie-tools/serverless-workflow-jq-expressions/dist/utils";
-import { parseApiContent } from "@kie-tools/serverless-workflow-service-catalog/dist/channel";
-
+import { JqExpressionContentType } from "@kie-tools/serverless-workflow-jq-expressions/dist/api";
+import { JSONSchema } from "vscode-json-languageservice";
 type SwfCompletionItemServiceCatalogFunction = SwfServiceCatalogFunction & { operation: string };
 export type SwfCompletionItemServiceCatalogService = Omit<SwfServiceCatalogService, "functions"> & {
   functions: SwfCompletionItemServiceCatalogFunction[];
@@ -150,6 +148,14 @@ function getJqCompletionWordToSearch(slicedValue: string): string {
   return "";
 }
 
+function getUintArray(jsonSchema: JSONSchema): Uint8Array {
+  const jsonStr = JSON.stringify(jsonSchema, null, 0);
+  const uint8Arr = new Uint8Array(jsonStr.length);
+  for (let i = 0; i < jsonStr.length; i++) {
+    uint8Arr[i] = jsonStr.charCodeAt(i);
+  }
+  return uint8Arr;
+}
 /**
  * get the input workflow variables from remote/relative paths.
  */
@@ -161,47 +167,35 @@ const getJqInputVariablesCompletions: JqFunctionCompletion = async function getJ
     findNodeAtLocation(args.rootNode, ["functions"])?.children as ELsNode[]
   );
   const dataInputSchemaPath = findNodeAtLocation(args.rootNode, ["dataInputSchema"])?.value;
-  console.log("does it come here --->", dataInputSchemaPath);
-  let inlineSchemaData;
   if (dataInputSchemaPath) {
-    if (typeof JSON.parse(dataInputSchemaPath) === "object") {
-      //logic for resolving the obj
-      inlineSchemaData = Object.entries(
-        parseApiContent({
-          serviceFileName: `inilineSchema.${dataInputSchemaPath.startsWith("{") ? "json" : "yaml"}`,
-          serviceFileContent: dataInputSchemaPath,
-          source: {
-            type: SwfCatalogSourceType.LOCAL_FS,
-            absoluteFilePath: ".",
-          },
-        }).functions[0].arguments
-      ).map((val) => {
-        return {
-          [val[0]]: val[1],
-        };
-      });
-      console.log(inlineSchemaData);
+    if (isRemotePath(dataInputSchemaPath)) {
+      remoteList.push(dataInputSchemaPath);
     } else {
-      if (isRemotePath(dataInputSchemaPath)) {
-        remoteList.push(dataInputSchemaPath);
-      } else {
-        relativeList.push(dataInputSchemaPath);
-      }
+      relativeList.push(dataInputSchemaPath);
     }
   }
-  if (remoteList.length > 0 || relativeList.length > 0 || inlineSchemaData) {
-    const schemaData = await Promise.all([
-      ...(await args.jqCompletions.remote.getJqAutocompleteProperties({
-        textDocument: args.document,
-        schemaPaths: remoteList ?? [],
-      })),
-      ...(await args.jqCompletions.relative.getJqAutocompleteProperties({
-        textDocument: args.document,
-        schemaPaths: relativeList ?? [],
-      })),
-      ...(inlineSchemaData as any),
-    ]);
-    console.log("schema data", schemaData);
+
+  const dataInputSchemaObject = JSON.parse(JSON.parse(JSON.stringify(args.document.getText()))).dataInputSchema?.schema;
+  const allPromises = [
+    ...(await args.jqCompletions.remote.getJqAutocompleteProperties({
+      textDocument: args.document,
+      schemaPaths: remoteList ?? [],
+    })),
+    ...(await args.jqCompletions.relative.getJqAutocompleteProperties({
+      textDocument: args.document,
+      schemaPaths: relativeList ?? [],
+    })),
+  ];
+  if (dataInputSchemaObject) {
+    const schemaDetails: JqExpressionContentType = {
+      fileName: "test.sw.json",
+      absoluteFilePath: ".",
+      fileContent: getUintArray(dataInputSchemaObject),
+    };
+    allPromises.push(...(await args.jqCompletions.relative.getSchemaPropertiesFromInputSchema(schemaDetails)));
+  }
+  if (remoteList.length > 0 || relativeList.length > 0) {
+    const schemaData = await Promise.all(allPromises);
     if (schemaData.length === 0) {
       return Promise.resolve([]);
     }
@@ -699,3 +693,10 @@ export const SwfLanguageServiceCodeCompletion: EditorLanguageServiceCodeCompleti
     return Promise.resolve([]);
   },
 };
+function parseApiContent(arg0: {
+  serviceFileName: string;
+  serviceFileContent: any;
+  source: { type: SwfCatalogSourceType; absoluteFilePath: string };
+}) {
+  throw new Error("Function not implemented.");
+}

@@ -32,6 +32,8 @@ import { getFileLanguageOrThrow } from "@kie-tools/serverless-workflow-language-
 import { KogitoEditorDocument } from "@kie-tools-core/vscode-extension/dist/VsCodeKieEditorController";
 import { JqExpressionsReadSchemaFromFs } from "../jqExpressionCompletion/fs/JqExpressionsReadSchemaFromFs";
 import { removeDuplicatedKeyValuePairs } from "@kie-tools/serverless-workflow-jq-expressions/dist/utils";
+import { JqExpressionContentType } from "@kie-tools/serverless-workflow-jq-expressions/dist/api";
+import { JqExpressionReadSchemasImpl } from "@kie-tools/serverless-workflow-jq-expressions/dist/impl";
 export const SWF_YAML_LANGUAGE_ID = "serverless-workflow-yaml";
 export const SWF_JSON_LANGUAGE_ID = "serverless-workflow-json";
 
@@ -135,6 +137,14 @@ export class VsCodeSwfLanguageService {
             const jqExpressionReadSchema = new JqExpressionsReadSchemaFromFs();
             const contentArray = await jqExpressionReadSchema.getContentFromFs(schemaAbsoluteFilePath);
             return removeDuplicatedKeyValuePairs(jqExpressionReadSchema.parseSchemaProperties(contentArray));
+          },
+          getSchemaPropertiesFromInputSchema: async (
+            args: JqExpressionContentType
+          ): Promise<Record<string, string>[]> => {
+            const jqExpressionReadSchema = new JqExpressionReadSchemasImpl();
+            console.error("this is the schemaaaaaa", args.fileName);
+            console.log("this is the schemaaaaaa", args.fileName);
+            return removeDuplicatedKeyValuePairs(jqExpressionReadSchema.parseSchemaProperties([args]));
           },
         },
       },

@@ -20,7 +20,7 @@ import {
 } from "@kie-tools/json-yaml-language-service/dist/channel";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { SwfLanguageServiceCommandTypes } from "../api";
-
+import { JqExpressionContentType } from "@kie-tools/serverless-workflow-jq-expressions/dist/api";
 export interface ShouldCreateCodelensArgs extends ELsShouldCreateCodelensArgs<SwfLanguageServiceCommandTypes> {}
 
 export interface CodeCompletionStrategy extends ELsCodeCompletionStrategy<SwfLanguageServiceCommandTypes> {}
@@ -37,5 +37,6 @@ export interface JqCompletions {
       textDocument: TextDocument;
       schemaPaths: string[];
     }): Promise<Record<string, string>[]>;
+    getSchemaPropertiesFromInputSchema(schemaDetails: JqExpressionContentType): Promise<Record<string, string>[]>;
   };
 }
