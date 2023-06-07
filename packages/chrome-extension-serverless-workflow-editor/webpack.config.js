@@ -63,6 +63,9 @@ module.exports = async (env) => {
       compress: true,
       https: true,
       port: buildEnv.swfChromeExtension.dev.port,
+      client: {
+        overlay: false,
+      },
     },
     plugins: [
       new EnvironmentPlugin({
