@@ -23,7 +23,7 @@ import {
   extractOpenFilePath,
   iframeFullscreenContainer,
   removeAllChildren,
-  waitForElementToBeReady,
+  waitForElementAttributeToBeDefined,
 } from "../../utils";
 import { SingleEditorApp } from "./SingleEditorApp";
 import { Globals, Main } from "../common/Main";
@@ -36,7 +36,9 @@ export async function renderSingleEditorApp(args: Globals & { fileInfo: FileInfo
   // TODO: This if can be removed once github unifies the ui for logged in/out users.
   if (document.body.classList.contains("logged-in")) {
     // wait for the dom element to be ready before rendering.
-    await waitForElementToBeReady(".CodeMirror");
+    //await waitForElementToBeReady(".ͼ8");
+    await waitForElementAttributeToBeDefined(".cm-content", "cmView");
+    // await waitForPropertyToBeReady(".cm-content")
   }
   // Checking whether this text editor exists is a good way to determine if the page is "ready",
   // because that would mean that the user could see the default GitHub page.
@@ -86,7 +88,8 @@ function SingleEditorEditApp(props: { openFileExtension: string; fileInfo: FileI
   }, [globals.dependencies]);
 
   const getFileContents = useCallback(() => {
-    return Promise.resolve(globals.dependencies.all.edit__githubTextAreaWithFileContents()!.value);
+    globals.dependencies.all.edit__githubTextAreaWithFileContents();
+    return Promise.resolve("");
   }, [globals.dependencies]);
 
   return (

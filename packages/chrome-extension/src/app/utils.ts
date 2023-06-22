@@ -145,3 +145,16 @@ export function waitForElementToBeReady(selector: string) {
     });
   });
 }
+
+export function waitForElementAttributeToBeDefined(selector: any, attribute: any) {
+  return new Promise(function (resolve) {
+    var interval = setInterval(() => {
+      console.log("is the interval called");
+      if (document.querySelector(selector) && document.querySelector(selector)[attribute]) {
+        console.log("does it go inside the if", document.querySelector(selector)[attribute]);
+        resolve(document.querySelector(selector));
+        clearInterval(interval);
+      }
+    }, 500);
+  });
+}
